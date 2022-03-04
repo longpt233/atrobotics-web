@@ -2,6 +2,7 @@ package repository
 
 import (
 	"atro/internal/model"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -18,4 +19,8 @@ func NewUserRepository() UserRepository {
 	return &userRepository{
 		connection: DB(),
 	}
+}
+
+func (db *userRepository) GetUser(id int) (user model.User, err error) {
+	return user, db.connection.First(&user, id).Error
 }
