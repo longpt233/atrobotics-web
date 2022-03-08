@@ -10,14 +10,16 @@ import (
 
 func loadenv() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Error loading .env file")
+	} else {
+		log.Println("Load .env succesfullyyy")
 	}
 }
 
 func main() {
+
 	fmt.Println("Main Application Starts")
 	//Loading Environmental Variable
 	loadenv()
-
 	log.Fatal(router.RunAPI(":8091"))
 }
