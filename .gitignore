@@ -134,4 +134,5 @@ go.work
 # more
 atro
 server/.env
+/.idea/
 client/package-lock.json
