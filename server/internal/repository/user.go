@@ -23,7 +23,7 @@ func NewUserRepository() UserRepository {
 	}
 }
 
-func (db *userRepository) GetUser(id int) (user model.User, err error) {
+func (db *userRepository) GetUser(id int) (user model.User, err error) { // TODO tại sao k xóa dc cái user thường ở cái return này đi như hàm bên dưới ? 
 	return user, db.connection.First(&user,"user_id=?", id).Error
 }
 
