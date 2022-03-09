@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"atro/internal/model"
 	"fmt"
 	"log"
 	"os"
@@ -24,7 +23,6 @@ func DB() *gorm.DB {
 	}
 
 	db.LogMode(true) // show query log
-	db.AutoMigrate(&model.Admin{})
+	db.AutoMigrate()
 	return db
-
 }
