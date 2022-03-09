@@ -23,7 +23,7 @@ func NewRoleRepository() RoleRepository{
 }
 
 func (db* roleRepository) GetRole(id int) (role model.Role, err error){
-	return role, db.connection.First(&role, id).Error
+	return role, db.connection.First(&role, "role_id=?",id).Error
 }
 
 func (db* roleRepository) AddRole(role model.Role) (model.Role, error){
