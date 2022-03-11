@@ -33,7 +33,7 @@ func NewUserHandler() UserHandler { // interface mac dinh la kieu con tro -> tra
 	return &a // tra ve dia chi cua 1 struct userHandler , cai struct nay phai implement het cua interface UserHandler
 }
 func (h *userHandler) GetUser(ctx *gin.Context) {
-	id := ctx.Query("id")
+	id := ctx.Param("id")
 	intID, err := strconv.Atoi(id)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

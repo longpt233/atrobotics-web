@@ -1,11 +1,16 @@
 package repository
 
 import (
+	"atro/internal/model"
+
 	"github.com/jinzhu/gorm"
 )
-
-// chưa implement Tuấn đỉnh cao làm nha 
 type ProductRepository interface { 
+	AddProduct(model.Product) (model.Product, error)
+	GetProduct(int) (model.Product, error)
+	GetAllProducts() ([]model.Product, error)
+	UpdateProduct(model.Product) (model.Product, error)
+	DeleteProduct(int) (model.Product, error)
 }
 
 type productRepository struct {
@@ -17,4 +22,29 @@ func NewProductRepository() ProductRepository {
 	return &productRepository{
 		connection: DB(),
 	}
+}
+
+func (db *productRepository) GetProduct(id int) (product model.Product, err error){
+	return product, db.connection.First(&product, "product_id=?",id).Error
+}
+func (db *productRepository) GetAllProducts() (products []model.Product, err error){
+	return products, db.connection.Find(&products).Error
+}
+func (db *productRepository) AddProduct(product model.Product) (model.Product, error){
+	return product, db.connection.Create(&product).Error
+}
+func (db *productRepository) UpdateProduct(product model.Product) (model.Product, error){
+	var checkProduct model.Product
+	if err := db.connection.First(&checkProduct, "product_id=?", product.ProductID).Error; err != nil {
+		return checkProduct, err
+	}
+	product.ProductCreatedAt = checkProduct.ProductCreatedAt
+	return product, db.connection.Model(&product).Where(model.Product{ProductID: product.ProductID}).Updates(&product).Error
+}
+func (db *productRepository) DeleteProduct(id int) (model.Product, error){
+	var product model.Product
+	if err := db.connection.First(&product, "product_id=?", id).Error; err != nil {
+		return product, err
+	}
+	return product, db.connection.Delete(&product, "product_id=?",product.ProductID).Error
 }
