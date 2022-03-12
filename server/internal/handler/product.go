@@ -2,15 +2,11 @@ package handler
 
 import (
 	"atro/internal/helper"
-	"atro/internal/model"
-	"atro/internal/model/base"
 	"atro/internal/model/request"
 	"atro/internal/model/response"
 	"atro/internal/repository"
-	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,7 +36,18 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when get list products", err.Error()))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", products))
+	var rsProducts []response.ProductResponse
+	for i := 0; i < len(products); i++ {
+		var p response.ProductResponse
+		p, err := p.ProductToProductResponse(products[i])
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to array", err.Error()))
+			return
+		}
+		rsProducts = append(rsProducts, p)
+	}
+	
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsProducts))
 }
 
 func (h *productHandler) GetProduct(ctx *gin.Context) {
@@ -55,67 +62,25 @@ func (h *productHandler) GetProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
 		return
 	}
-	var productImg []string
-	var productCol []string
-	if err := json.Unmarshal([]byte(product.ProductImages), &productImg); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to []string", ""))
+	var resProduct response.ProductResponse
+	resProduct, err = resProduct.ProductToProductResponse(product)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to array", err.Error()))
 		return
-	}
-	if err := json.Unmarshal([]byte(product.ProductColor), &productCol); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to []string", ""))
-		return
-	}
-	resProduct := response.ProductResponse{
-		ProductID:        intID,
-		ProductImages:    productImg,
-		ProductColor:     productCol,
-		ProductUpdatedAt: product.ProductUpdatedAt,
-		ProductCreatedAt: product.ProductCreatedAt,
-		BaseProduct: base.BaseProduct{
-			ProductName:       product.ProductName,
-			ProductPrice:      product.ProductPrice,
-			ProductShortDesc:  product.ProductShortDesc,
-			ProductLongDesc:   product.ProductLongDesc,
-			ProductCategoryID: product.ProductCategoryID,
-			ProductAvailable:  product.ProductAvailable,
-			ProductBrand:      product.ProductBrand,
-			ProductSold:       product.ProductSold,
-		},
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get product successfully!", resProduct))
 }
 
 func (h *productHandler) AddProduct(ctx *gin.Context) {
-	var newProduct request.NewProductForm
+	var newProduct request.ProductRequest
 	if err := ctx.ShouldBindJSON(&newProduct); err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
 		return
 	}
-	productImg, err := json.Marshal(newProduct.ProductImages)
+	rsProduct, err := newProduct.ProductRequestToProduct()
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", ""))
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", err.Error()))
 		return
-	}
-	productCol, err := json.Marshal(newProduct.ProductColor)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", ""))
-		return
-	}
-	rsProduct := model.Product{
-		ProductImages:    string(productImg),
-		ProductColor:     string(productCol),
-		ProductCreatedAt: time.Now(),
-		ProductUpdatedAt: time.Now(),
-		BaseProduct: base.BaseProduct{
-			ProductName:       newProduct.ProductName,
-			ProductPrice:      newProduct.ProductPrice,
-			ProductShortDesc:  newProduct.ProductShortDesc,
-			ProductLongDesc:   newProduct.ProductLongDesc,
-			ProductCategoryID: newProduct.ProductCategoryID,
-			ProductAvailable:  newProduct.ProductAvailable,
-			ProductSold:       newProduct.ProductSold,
-			ProductBrand:      newProduct.ProductBrand,
-		},
 	}
 	product, err := h.repo.AddProduct(rsProduct)
 	if err != nil {
@@ -125,7 +90,7 @@ func (h *productHandler) AddProduct(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "add product successfully!", product))
 }
 func (h *productHandler) UpdateProduct(ctx *gin.Context) {
-	var newProduct request.NewProductForm
+	var newProduct request.ProductRequest
 	if err := ctx.ShouldBindJSON(&newProduct); err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
 		return
@@ -136,33 +101,12 @@ func (h *productHandler) UpdateProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
 		return
 	}
-	productImg, err := json.Marshal(newProduct.ProductImages)
+	rsProduct, err := newProduct.ProductRequestToProduct()
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", ""))
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", err.Error()))
 		return
 	}
-	productCol, err := json.Marshal(newProduct.ProductColor)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", ""))
-		return
-	}
-	rsProduct := model.Product{
-		ProductID:        intID,
-		ProductImages:    string(productImg),
-		ProductColor:     string(productCol),
-		ProductCreatedAt: time.Now(),
-		ProductUpdatedAt: time.Now(),
-		BaseProduct: base.BaseProduct{
-			ProductName:       newProduct.ProductName,
-			ProductPrice:      newProduct.ProductPrice,
-			ProductShortDesc:  newProduct.ProductShortDesc,
-			ProductLongDesc:   newProduct.ProductLongDesc,
-			ProductCategoryID: newProduct.ProductCategoryID,
-			ProductAvailable:  newProduct.ProductAvailable,
-			ProductSold:       newProduct.ProductSold,
-			ProductBrand:      newProduct.ProductBrand,
-		},
-	}
+	rsProduct.ProductID = intID
 	updateProduct, err := h.repo.UpdateProduct(rsProduct)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
