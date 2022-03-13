@@ -22,33 +22,37 @@ func RunAPI(address string) error {
 	productHandler := handler.NewProductHandler()
 	productCategoryHandler := handler.NewProductCategoryHandler()
 	userHandler := handler.NewUserHandler()
+	orderHandler := handler.NewOrderHandler()
 
 	// api cho user
 	userRoutes := apiRoutes.Group("/user")
 	{
-		// unauthorize api 
+		// unauthorize api
 
 		// đăng nhập đăng kí
-		userRoutes.POST("/login", userHandler.SignInUser) 
-		userRoutes.POST("/register", userHandler.AddUser) 
+		userRoutes.POST("/login", userHandler.SignInUser)
+		userRoutes.POST("/register", userHandler.AddUser)
 		userRoutes.POST("/logout", nil)
 
-		// xem liên quan 
+		// xem liên quan
 		userRoutes.GET("/products/", productHandler.GetAllProduct)
 		userRoutes.GET("/products/:id", productHandler.GetProduct)
 		userRoutes.GET("/categories/", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
 
 		// authorize api
-		userAuth := userRoutes.Group("/auth",middleware.AuthorizeJWT()) 
-		userAuth.GET("", userHandler.GetUser) 
-	}
+		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
+		userAuth.GET("", userHandler.GetUser)
 
+		// create order . chỉ cho tạo
+		userAuth.POST("/order", orderHandler.OrderProduct)  // gửi lên cái là chốt đơn. 
+
+	}
 
 	// api cho admin
 	adminRouter := apiRoutes.Group("/admin")
 	{
-		// unauthorize api 
+		// unauthorize api
 
 		// authorize api
 		adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
@@ -61,14 +65,15 @@ func RunAPI(address string) error {
 		// product
 		adminAuth.POST("/products/", productHandler.AddProduct)
 		adminAuth.DELETE("/products/:id", productHandler.DeleteProduct)
-		adminAuth.PUT("/products/:id",productHandler.UpdateProduct)
-		
-		// order info
+		adminAuth.PUT("/products/:id", productHandler.UpdateProduct)
+
+		// order info. không cho del, k cho tạo
+		adminAuth.GET("/order", orderHandler.GetAllOrderProduct)
+		adminAuth.GET("/order:id", orderHandler.GetOrderProduct)
+		adminAuth.PUT("/order:id", orderHandler.UpdateOrderProduct)
 
 		// upload file
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)
-
-
 
 	}
 
