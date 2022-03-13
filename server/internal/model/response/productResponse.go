@@ -9,14 +9,14 @@ import (
 
 type ProductResponse struct {
 	base.BaseProduct
-	ProductID         int       `json:"product_id" gorm:"primaryKey"`
-	ProductImages     []string    `json:"product_images"`
-	ProductUpdatedAt  time.Time `json:"product_updated_at"`
-	ProductColor      []string    `json:"product_color"`
-	ProductCreatedAt  time.Time `json:"product_created_at"`
+	ProductID        int       `json:"product_id" gorm:"primaryKey"`
+	ProductImages    []string  `json:"product_images"`
+	ProductUpdatedAt time.Time `json:"product_updated_at"`
+	ProductColor     []string  `json:"product_color"`
+	ProductCreatedAt time.Time `json:"product_created_at"`
 }
 
-func (p *ProductResponse) ProductToProductResponse(product model.Product) (ProductResponse, error){
+func (p *ProductResponse) ProductToProductResponse(product model.Product) (ProductResponse, error) {
 	var productImg []string
 	var productCol []string
 	if err := json.Unmarshal([]byte(product.ProductImages), &productImg); err != nil {

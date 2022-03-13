@@ -19,56 +19,56 @@ func RunAPI(address string) error {
 
 	apiRoutes := r.Group("/api/v1")
 
-	// adminRoutes := apiRoutes.Group("/admin")
-	// adminHandler := handler.NewAdminHandler()
 	productHandler := handler.NewProductHandler()
 	productCategoryHandler := handler.NewProductCategoryHandler()
-	// {
-	// 	// unauthorize api 
-	// 	adminRoutes.POST("/login", adminHandler.SignInUser) // /admin/login
-	// 	adminRoutes.POST("/register", adminHandler.AddUser) // cứ cho đăng kí để có data trong db đã
-	// 	adminRoutes.POST("/logout", nil)
-
-	// 	// auth api 
-	// 	adminAuth := adminRoutes.Group("/auth", middleware.AuthorizeJWT())
-	// 	{
-
-	// 		// product
-	// 		adminAuth.PUT("/products/:id", productHandler.UpdateProduct) // /admin/auth/products
-	// 		adminAuth.POST("/products/", productHandler.AddProduct)
-	// 		adminAuth.DELETE("/products/:id", productHandler.DeleteProduct)
-
-	// 		// category
-
-	// 		// order info
-	// 	}
-
-	// }
-
-	userRoutes := apiRoutes.Group("/user")
 	userHandler := handler.NewUserHandler()
 
+	// api cho user
+	userRoutes := apiRoutes.Group("/user")
 	{
 		// unauthorize api 
+
+		// đăng nhập đăng kí
 		userRoutes.POST("/login", userHandler.SignInUser) 
 		userRoutes.POST("/register", userHandler.AddUser) 
 		userRoutes.POST("/logout", nil)
+
+		// xem liên quan 
 		userRoutes.GET("/products/", productHandler.GetAllProduct)
 		userRoutes.GET("/products/:id", productHandler.GetProduct)
 		userRoutes.GET("/categories/", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
 
-		// auth api
+		// authorize api
 		userAuth := userRoutes.Group("/auth",middleware.AuthorizeJWT()) 
-		userAuth.GET("", userHandler.GetUser) // api/user?ip=1
+		userAuth.GET("", userHandler.GetUser) 
+	}
 
-		adminAuth := apiRoutes.Group("/admin/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+
+	// api cho admin
+	adminRouter := apiRoutes.Group("/admin")
+	{
+		// unauthorize api 
+
+		// authorize api
+		adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+
+		// category
 		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)
 		adminAuth.DELETE("/categories/:id", productCategoryHandler.DeleteProductCategory)
 		adminAuth.PUT("/categories/:id", productCategoryHandler.UpdateProductCategory)
+
+		// product
 		adminAuth.POST("/products/", productHandler.AddProduct)
 		adminAuth.DELETE("/products/:id", productHandler.DeleteProduct)
 		adminAuth.PUT("/products/:id",productHandler.UpdateProduct)
+		
+		// order info
+
+		// upload file
+		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)
+
+
 
 	}
 
