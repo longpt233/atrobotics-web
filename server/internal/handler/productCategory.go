@@ -5,9 +5,9 @@ import (
 	"atro/internal/model"
 	"atro/internal/repository"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ProductCategoryHandler interface {
@@ -30,12 +30,7 @@ func NewProductCategoryHandler() ProductCategoryHandler{
 
 func (h *productCategoryHandler) GetProductCategory(ctx *gin.Context){
 	id := ctx.Param("id")
-	intID, err := strconv.Atoi(id)
-	if err!= nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
-		return
-	}
-	category, err := h.repo.GetProductCategory(intID)
+	category, err := h.repo.GetProductCategory(id)
 	if err!= nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find category", err.Error()))
 		return
@@ -53,17 +48,12 @@ func (h *productCategoryHandler) GetAllProductCategories(ctx *gin.Context){
 }
 func (h *productCategoryHandler) UpdateProductCategory(ctx *gin.Context){
 	id := ctx.Param("id")
-	intID, err := strconv.Atoi(id)
-	if err!= nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
-		return
-	}
 	var category model.ProductCategory
 	if err:= ctx.ShouldBindJSON(&category); err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1,"invalid input format", err.Error()))
 		return
 	}
-	category.ProductCategoryID = intID
+	category.ProductCategoryID = id
 	newCategory, err := h.repo.UpdateProductCategory(category)
 	if err!= nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find category", err.Error()))
@@ -74,12 +64,7 @@ func (h *productCategoryHandler) UpdateProductCategory(ctx *gin.Context){
 }
 func (h *productCategoryHandler) DeleteProductCategory(ctx *gin.Context){
 	id := ctx.Param("id")
-	intID, err := strconv.Atoi(id)
-	if err!= nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
-		return
-	}
-	category, err := h.repo.DeleteProductCategory(intID)
+	category, err := h.repo.DeleteProductCategory(id)
 	if err!= nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find category", err.Error()))
 		return
@@ -92,6 +77,7 @@ func (h *productCategoryHandler) AddProductCategory(ctx *gin.Context){
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1,"invalid input format", err.Error()))
 		return
 	}
+	category.ProductCategoryID = uuid.NewString()
 	newCategory, err := h.repo.AddProductCategory(category)
 	if err!= nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when add new category", err.Error()))

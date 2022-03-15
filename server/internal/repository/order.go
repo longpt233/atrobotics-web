@@ -8,7 +8,7 @@ import (
 
 //OrderRepository --> Repository for Order Model
 type OrderRepository interface {
-	OrderProduct(model.Order) (model.Order,error)
+	OrderProduct(model.Order) (model.Order, error)
 }
 
 type orderRepository struct {

@@ -35,7 +35,6 @@ func NewOrderHandler() OrderHandler {
 }
 
 func (h *orderHandler) OrderProduct(ctx *gin.Context) {
-
 	// lấy thông tin order từ request
 	var orderForm request.OrderRequest
 	if err := ctx.ShouldBindJSON(&orderForm); err != nil {
@@ -51,7 +50,7 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) {
 	}
 
 	// chuyển đổi từ đơn về một ban ghi để lưu db
-	order, err := h.OrderRequestToOrder(&orderForm, int(id.(float64))) // parse asset id to int syntax
+	order, err := h.OrderRequestToOrder(&orderForm, fmt.Sprint(id)) // parse asset id to int syntax
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "không thể  tạo đơn", err.Error()))
 		return
@@ -76,7 +75,7 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 func (h *orderHandler) UpdateOrderProduct(ctx *gin.Context) {
 }
 
-func (h *orderHandler) OrderRequestToOrder(orderForm *request.OrderRequest, userId int) (model.Order, error) {
+func (h *orderHandler) OrderRequestToOrder(orderForm *request.OrderRequest, userId string) (model.Order, error) {
 
 	// từ cái json gủi lên tính tiền
 	total := 0.0
@@ -98,11 +97,11 @@ func (h *orderHandler) OrderRequestToOrder(orderForm *request.OrderRequest, user
 	}
 
 	order := model.Order{
-		UserId:         userId,
-		OrderDetail:    string(productOrdersInfo),
-		OrderPrice:     float32(total),
+		UserId: userId,
+		OrderDetail: string(productOrdersInfo),
+		OrderPrice: float32(total),
 		OrderCreatedAt: time.Now(),
-		OrderStatus:    orderForm.TypeOrder,
+		OrderStatus: orderForm.TypeOrder,
 	}
 	return order, nil
 }

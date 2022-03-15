@@ -7,10 +7,10 @@ import (
 )
 type ProductRepository interface { 
 	AddProduct(model.Product) (model.Product, error)
-	GetProduct(int) (model.Product, error)
+	GetProduct(string) (model.Product, error)
 	GetAllProducts() ([]model.Product, error)
 	UpdateProduct(model.Product) (model.Product, error)
-	DeleteProduct(int) (model.Product, error)
+	DeleteProduct(string) (model.Product, error)
 }
 
 type productRepository struct {
@@ -24,7 +24,7 @@ func NewProductRepository() ProductRepository {
 	}
 }
 
-func (db *productRepository) GetProduct(id int) (product model.Product, err error){
+func (db *productRepository) GetProduct(id string) (product model.Product, err error){
 	return product, db.connection.First(&product, "product_id=?",id).Error
 }
 func (db *productRepository) GetAllProducts() (products []model.Product, err error){
@@ -41,7 +41,7 @@ func (db *productRepository) UpdateProduct(product model.Product) (model.Product
 	product.ProductCreatedAt = checkProduct.ProductCreatedAt
 	return product, db.connection.Model(&product).Where(model.Product{ProductID: product.ProductID}).Updates(&product).Error
 }
-func (db *productRepository) DeleteProduct(id int) (model.Product, error){
+func (db *productRepository) DeleteProduct(id string) (model.Product, error){
 	var product model.Product
 	if err := db.connection.First(&product, "product_id=?", id).Error; err != nil {
 		return product, err

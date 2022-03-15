@@ -4,8 +4,8 @@ import "time"
 
 //Order --> Model to entity Order
 type Order struct {
-	OrderId        int       `json:"order_id" gorm:"primaryKey"`
-	UserId         int       `json:"user_id"`
+	OrderId        string      `json:"order_id" gorm:"primaryKey"`
+	UserId         string       `json:"user_id"`
 	OrderDetail    string    `json:"order_detail"`
 	OrderPrice     float32   `json:"order_price"`
 	OrderCreatedAt time.Time `json:"order_created_at"`

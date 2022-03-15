@@ -8,7 +8,7 @@ import (
 
 type UserRepository interface {
 	GetUserByEmail(string) (model.User, error)
-	GetUser(int) (model.User, error)
+	GetUser(string) (model.User, error)
 	AddUser(user model.User) (model.User, error)
 }
 
@@ -23,7 +23,7 @@ func NewUserRepository() UserRepository {
 	}
 }
 
-func (db *userRepository) GetUser(id int) (user model.User, err error) { // TODO tại sao k xóa dc cái user thường ở cái return này đi như hàm bên dưới ? 
+func (db *userRepository) GetUser(id string) (user model.User, err error) { // TODO tại sao k xóa dc cái user thường ở cái return này đi như hàm bên dưới ? 
 	return user, db.connection.First(&user,"user_id=?", id).Error
 }
 

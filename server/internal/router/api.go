@@ -45,11 +45,7 @@ func RunAPI(address string) error {
 
 		// authorize api
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
-
-		// lấy,xửa,xóa thông tin user
-		userAuth.GET("/profiles/:id", userHandler.GetUser)
-		userAuth.PUT("/profiles/:id", nil)
-		userAuth.DELETE("/profiles/", nil)
+		userAuth.GET("/get-user-info", userHandler.GetUserInformation)
 
 		// create order . chỉ cho tạo
 		userAuth.POST("/order", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
@@ -83,7 +79,6 @@ func RunAPI(address string) error {
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)
 
 	}
-
 	return r.Run(address)
 
 }
