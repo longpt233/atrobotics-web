@@ -4,8 +4,8 @@ package model
 type Order struct {
 	User      User    `gorm:"foreignkey:UserID"`
 	Product   Product `gorm:"foreignkey:ProductID"`
-	UserID    uint
-	ProductID uint
+	UserID    string
+	ProductID string
 	Quantity  int `json:"quantity"`
 }
 

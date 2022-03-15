@@ -9,7 +9,7 @@ import (
 )
 
 //GenerateToken -> generates token
-func GenerateToken(userid uint) string {
+func GenerateToken(userid string) string {
 	claims := jwt.MapClaims{
 		"exp":    time.Now().Add(time.Hour * 3).Unix(),
 		"iat":    time.Now().Unix(),

@@ -8,7 +8,7 @@ import (
 
 //OrderRepository --> Repository for Order Model
 type OrderRepository interface {
-	OrderProduct(int, int, int) error
+	OrderProduct(string, string, int) error
 }
 
 type orderRepository struct {
@@ -22,10 +22,10 @@ func NewOrderRepository() OrderRepository {
 	}
 }
 
-func (db *orderRepository) OrderProduct(userID int, productID int, quantity int) error {
+func (db *orderRepository) OrderProduct(userID string, productID string, quantity int) error {
 	return db.connection.Create(&model.Order{
-		ProductID: uint(productID),
-		UserID:    uint(userID),
+		ProductID: productID,
+		UserID:    userID,
 		Quantity:  quantity,
 	}).Error
 }

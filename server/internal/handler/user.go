@@ -7,16 +7,17 @@ import (
 	"atro/internal/repository"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/google/uuid"
 )
 
 type UserHandler interface {
 	GetUser(*gin.Context)
 	AddUser(*gin.Context)
 	SignInUser(*gin.Context)
+	GetUserInformation(* gin.Context)
 }
 
 type userHandler struct {
@@ -34,16 +35,10 @@ func NewUserHandler() UserHandler { // interface mac dinh la kieu con tro -> tra
 }
 func (h *userHandler) GetUser(ctx *gin.Context) {
 	id := ctx.Param("id")
-	intID, err := strconv.Atoi(id)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	user, err := h.repo.GetUser(intID)
+	user, err := h.repo.GetUser(id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"get user information successfully", user))
 
@@ -63,6 +58,7 @@ func (h *userHandler) AddUser(ctx *gin.Context) {
 		return
 	} else {
 		user := model.User{
+			UserID: uuid.NewString(),
 			UserRoleID: userRole.RoleID,
 			UserEmail: registerUser.Email,
 			UserPassword: registerUser.Password,
@@ -100,7 +96,7 @@ func (h *userHandler) SignInUser(ctx *gin.Context) {
 		isTrue := comparePass(loginUser.UserPassword, loginForm.Password);
 		if isTrue {
 			fmt.Println("Login with: ", loginUser.UserID)
-			token := GenerateToken(uint(loginUser.UserID))
+			token := GenerateToken(loginUser.UserID)
 			ctx.JSON(http.StatusOK, helper.BuildResponse(1, "login successfully!", token))
 			return
 		} else {
@@ -108,7 +104,32 @@ func (h *userHandler) SignInUser(ctx *gin.Context) {
 			return
 		}
 	}
+}
 
+func (h *userHandler) GetUserInformation(ctx *gin.Context) {
+	userID, isExist := ctx.Get("userID")
+	if isExist == true {
+		checkUser, err := repository.NewUserRepository().GetUser(fmt.Sprint(userID))
+		if err == nil {
+			role, err := repository.NewRoleRepository().GetRole(checkUser.UserRoleID)
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find ROLE", err.Error()))
+				return
+			} else {
+				if role.RoleName == "USER" {
+					checkUser.UserPassword = ""
+					ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get user information successfully!", checkUser))
+				} else {
+					ctx.AbortWithStatusJSON(http.StatusForbidden, helper.BuildResponse(-1, "only with USER role", ""))
+					return 
+				}
+			}
+		} else {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find USER", err.Error()))
+		}
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, helper.BuildResponse(-1, "Not Exist session", ""))
+	}
 }
 
 func hashPass(pass *string) {

@@ -7,7 +7,7 @@ import (
 )
 
 type RoleRepository interface {
-	GetRole(int) (model.Role, error)
+	GetRole(string) (model.Role, error)
 	AddRole(role model.Role) (model.Role, error)
 	GetRoleByName(string) (model.Role, error)
 }
@@ -22,7 +22,7 @@ func NewRoleRepository() RoleRepository{
 	}
 }
 
-func (db* roleRepository) GetRole(id int) (role model.Role, err error){
+func (db* roleRepository) GetRole(id string) (role model.Role, err error){
 	return role, db.connection.First(&role, "role_id=?",id).Error
 }
 

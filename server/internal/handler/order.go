@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"atro/internal/helper"
 	"atro/internal/repository"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -29,27 +31,26 @@ func NewOrderHandler() OrderHandler {
 
 func (h *orderHandler) OrderProduct(ctx *gin.Context) {
 	prodIDStr := ctx.Param("product")
-	if prodID, err := strconv.Atoi(prodIDStr); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-	} else {
-		quantityIDStr := ctx.Param("quantity")
+	quantityIDStr := ctx.Param("quantity")
 		if quantityID, err := strconv.Atoi(quantityIDStr); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 		} else {
-			userID := ctx.GetFloat64("userID")
-			if err := h.repo.OrderProduct(int(userID), prodID, quantityID); err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"error": err.Error(),
-				})
-			} else {
-				ctx.String(http.StatusOK, "Product Successfully ordered")
+			userID, isExist := ctx.Get("userID")
+			if isExist {
+				if err := h.repo.OrderProduct(fmt.Sprint(userID), prodIDStr, quantityID); err != nil {
+					ctx.JSON(http.StatusBadRequest, gin.H{
+						"error": err.Error(),
+					})
+				} else {
+					ctx.String(http.StatusOK, "Product Successfully ordered")
+				}
+			}else {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, helper.BuildResponse(-1, "Not Exist session", ""))
 			}
+			
 		}
-	}
 
 }
 
