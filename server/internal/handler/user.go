@@ -97,8 +97,8 @@ func (h *userHandler) SignInUser(ctx *gin.Context) {
 }
 
 func (h *userHandler) GetUser(ctx *gin.Context) {
-	userID, isExist := ctx.Get("userID")
-	if isExist == true {
+	
+	if userID, isExist := ctx.Get("userID"); isExist {
 		checkUser, err := repository.NewUserRepository().GetUser(fmt.Sprint(userID))
 		if err == nil {
 			role, err := repository.NewRoleRepository().GetRole(checkUser.UserRoleID)

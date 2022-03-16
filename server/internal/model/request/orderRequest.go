@@ -7,5 +7,5 @@ type OrderRequest struct {
 
 type OrderObject struct {
 	ProductId string `json:"product_id"`
-	Quantity  int `json:"quantity"`
+	Quantity  int    `json:"quantity"`
 }

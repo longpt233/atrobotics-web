@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 //OrderHandler --> Handler for Order Entity
@@ -61,6 +62,7 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) {
 	}
 
 	// lưu vô db
+	order.OrderId = uuid.NewString()
 	rsOrder, err := h.repo.OrderProduct(order)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when add product (có thể là id bị sai)", err.Error()))
@@ -72,7 +74,14 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) {
 
 func (h *orderHandler) GetOrderProduct(ctx *gin.Context) {
 
-	
+	id := ctx.Param("id")
+	order, err := h.repo.GetOrder(id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get product successfully!", order))
+
 }
 
 func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
@@ -116,7 +125,7 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 
 	// tạo query filter
 	filter := ctx.Param("filter")
-	filterMap := map[string]string{}
+	filterMap := map[string]interface{}{}
 	if filter != "" {
 		filterMap, err = validateAndReturnFilterMap(filter)
 		if err != nil {
@@ -126,9 +135,9 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	}
 
 	// gửi query
-	rsOrders, err := h.repo.GetOrderSort(filterMap, limit, offset, sortQuery)
+	rsOrders, err := h.repo.GetAllOrderOptions(filterMap, limit, offset, sortQuery)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "not found !", ""))
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "not found !", err.Error()))
 		return
 	}
 
@@ -204,7 +213,7 @@ func validateAndReturnSortQuery(sortBy string) (string, error) {
 	return fmt.Sprintf("%s %s", field, strings.ToUpper(order)), nil
 }
 
-func validateAndReturnFilterMap(filter string) (map[string]string, error) {
+func validateAndReturnFilterMap(filter string) (map[string]interface{}, error) {
 	splits := strings.Split(filter, ".")
 	if len(splits) != 2 {
 		return nil, errors.New("malformed sortBy query parameter, should be field.orderdirection")
@@ -213,5 +222,5 @@ func validateAndReturnFilterMap(filter string) (map[string]string, error) {
 	if !stringInSlice(getOrderFields(), field) {
 		return nil, errors.New("unknown field in filter query parameter")
 	}
-	return map[string]string{field: value}, nil
+	return map[string]interface{}{field: value}, nil
 }

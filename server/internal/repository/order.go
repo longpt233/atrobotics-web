@@ -12,7 +12,7 @@ type OrderRepository interface {
 	GetAllOrder() ([]model.Order, error)
 	GetOrder(string) (model.Order, error)
 	UpdateOrder(model.Order) (model.Order, error)
-	GetOrderSort(filter map[string]string, limit int, offset int, query string) ([]model.Order, error)
+	GetAllOrderOptions(filter map[string]interface{}, limit int, offset int, query string) ([]model.Order, error)
 }
 
 type orderRepository struct {
@@ -39,11 +39,9 @@ func (db *orderRepository) GetOrder(id string) (order model.Order, err error) {
 }
 
 func (db *orderRepository) UpdateOrder(model.Order) (model.Order, error) {
-
 	return model.Order{}, nil
-
 }
 
-func (db *orderRepository) GetOrderSort(filter map[string]string, limit int, offset int, query string) (orders []model.Order, err error) {
+func (db *orderRepository) GetAllOrderOptions(filter map[string]interface{}, limit int, offset int, query string) (orders []model.Order, err error) {
 	return orders, db.connection.Where(filter).Limit(limit).Offset(offset).Order(query).Find(&orders).Error
 }
