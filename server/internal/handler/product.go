@@ -6,9 +6,9 @@ import (
 	"atro/internal/model/response"
 	"atro/internal/repository"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ProductHandler interface {
@@ -46,18 +46,13 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 		}
 		rsProducts = append(rsProducts, p)
 	}
-	
+
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsProducts))
 }
 
 func (h *productHandler) GetProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
-	intID, err := strconv.Atoi(id)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
-		return
-	}
-	product, err := h.repo.GetProduct(intID)
+	product, err := h.repo.GetProduct(id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
 		return
@@ -78,10 +73,12 @@ func (h *productHandler) AddProduct(ctx *gin.Context) {
 		return
 	}
 	rsProduct, err := newProduct.ProductRequestToProduct()
+
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", err.Error()))
 		return
 	}
+	rsProduct.ProductID = uuid.NewString()
 	product, err := h.repo.AddProduct(rsProduct)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when add product", err.Error()))
@@ -96,17 +93,12 @@ func (h *productHandler) UpdateProduct(ctx *gin.Context) {
 		return
 	}
 	id := ctx.Param("id")
-	intID, err := strconv.Atoi(id)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
-		return
-	}
 	rsProduct, err := newProduct.ProductRequestToProduct()
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", err.Error()))
 		return
 	}
-	rsProduct.ProductID = intID
+	rsProduct.ProductID = id
 	updateProduct, err := h.repo.UpdateProduct(rsProduct)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
@@ -116,12 +108,7 @@ func (h *productHandler) UpdateProduct(ctx *gin.Context) {
 }
 func (h *productHandler) DeleteProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
-	intID, err := strconv.Atoi(id)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid id input", err.Error()))
-		return
-	}
-	product, err := h.repo.DeleteProduct(intID)
+	product, err := h.repo.DeleteProduct(id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
 		return

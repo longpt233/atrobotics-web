@@ -2,9 +2,9 @@ package model
 
 //User -> model for users table
 type User struct {
-	UserID        int    `json:"user_id" gorm:"primaryKey"`
-	UserRoleID    int    `json:"user_role_id"` // col name
-	UserEmail     string `json:"user_email" binding:"required,email" gorm:"unique"`    //TODO:  binding ? 
+	UserID        string `json:"user_id" gorm:"primaryKey"`
+	UserRoleID    string `json:"user_role_id"`                                      // col name
+	UserEmail     string `json:"user_email" binding:"required,email" gorm:"unique"` //TODO:  binding ?
 	UserPassword  string `json:"user_password" binding:"required"`
 	UserFirstName string `json:"user_firstname"`
 	UserLastName  string `json:"user_lastname"`

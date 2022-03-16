@@ -7,7 +7,7 @@ import (
 
 type Product struct {
 	base.BaseProduct
-	ProductID        int       `json:"product_id" gorm:"primaryKey"`
+	ProductID        string    `json:"product_id" gorm:"primaryKey"`
 	ProductImages    string    `json:"product_images"`
 	ProductUpdatedAt time.Time `json:"product_updated_at"`
 	ProductColor     string    `json:"product_color"`

@@ -8,9 +8,9 @@ import (
 
 type ProductCategoryRepository interface {
 	AddProductCategory(model.ProductCategory) (model.ProductCategory, error)
-	GetProductCategory(int) (model.ProductCategory, error)
+	GetProductCategory(string) (model.ProductCategory, error)
 	GetAllProductCategories() ([]model.ProductCategory, error)
-	DeleteProductCategory(int) (model.ProductCategory, error)
+	DeleteProductCategory(string) (model.ProductCategory, error)
 	UpdateProductCategory(model.ProductCategory) (model.ProductCategory, error)
 }
 
@@ -23,7 +23,7 @@ func NewProductCategoryRepository() ProductCategoryRepository {
 		connection: DB(),
 	}
 }
-func (db *productCategoryRepository) GetProductCategory(id int) (productCategory model.ProductCategory, err error) {
+func (db *productCategoryRepository) GetProductCategory(id string) (productCategory model.ProductCategory, err error) {
 	return productCategory, db.connection.First(&productCategory, "product_category_id=?", id).Error
 }
 func (db *productCategoryRepository) GetAllProductCategories() (productCategories []model.ProductCategory, err error) {
@@ -32,7 +32,7 @@ func (db *productCategoryRepository) GetAllProductCategories() (productCategorie
 func (db *productCategoryRepository) AddProductCategory(productCategory model.ProductCategory) (model.ProductCategory, error) {
 	return productCategory, db.connection.Create(&productCategory).Error
 }
-func (db *productCategoryRepository) DeleteProductCategory(id int) (model.ProductCategory, error) {
+func (db *productCategoryRepository) DeleteProductCategory(id string) (model.ProductCategory, error) {
 	var category model.ProductCategory
 	if err := db.connection.First(&category, "product_category_id=?", id).Error; err != nil {
 		return category, err

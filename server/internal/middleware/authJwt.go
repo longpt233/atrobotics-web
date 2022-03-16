@@ -54,7 +54,7 @@ func IsAdmin() gin.HandlerFunc {
 		userID, isExist := ctx.Get("userID")
 		fmt.Println("userID: ", userID)
 		if isExist == true {
-			checkUser, err := repository.NewUserRepository().GetUser(int(userID.(float64)))
+			checkUser, err := repository.NewUserRepository().GetUser(fmt.Sprint(userID))
 			if err == nil {
 				role, err := repository.NewRoleRepository().GetRole(checkUser.UserRoleID)
 				if err != nil {
