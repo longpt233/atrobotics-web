@@ -45,10 +45,11 @@ func RunAPI(address string) error {
 
 		// authorize api
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
-		userAuth.GET("/get-user-info", userHandler.GetUserInformation)
+		userAuth.GET("/info", userHandler.GetUser)
+		userAuth.PUT("/info", userHandler.UpdateUser)
 
 		// create order . chỉ cho tạo
-		userAuth.POST("/order", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
+		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
 
 	}
 
@@ -71,9 +72,9 @@ func RunAPI(address string) error {
 		adminAuth.PUT("/products/:id", productHandler.UpdateProduct)
 
 		// order info. không cho del, k cho tạo
-		adminAuth.GET("/order", orderHandler.GetAllOrderProduct)
-		adminAuth.GET("/order:id", orderHandler.GetOrderProduct)
-		adminAuth.PUT("/order:id", orderHandler.UpdateOrderProduct)
+		adminAuth.GET("/orders", orderHandler.GetAllOrderProduct)
+		adminAuth.GET("/orders/:id", orderHandler.GetOrderProduct)
+		adminAuth.PUT("/orders/:id", orderHandler.UpdateOrderProduct)
 
 		// upload file
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)

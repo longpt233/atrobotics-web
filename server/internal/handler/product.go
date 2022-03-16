@@ -46,7 +46,7 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 		}
 		rsProducts = append(rsProducts, p)
 	}
-	
+
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsProducts))
 }
 
@@ -73,7 +73,7 @@ func (h *productHandler) AddProduct(ctx *gin.Context) {
 		return
 	}
 	rsProduct, err := newProduct.ProductRequestToProduct()
-	
+
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert array to json", err.Error()))
 		return

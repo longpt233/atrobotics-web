@@ -12,24 +12,24 @@ type RoleRepository interface {
 	GetRoleByName(string) (model.Role, error)
 }
 
-type roleRepository struct{
+type roleRepository struct {
 	connection *gorm.DB
 }
 
-func NewRoleRepository() RoleRepository{
+func NewRoleRepository() RoleRepository {
 	return &roleRepository{
 		connection: DB(),
 	}
 }
 
-func (db* roleRepository) GetRole(id string) (role model.Role, err error){
-	return role, db.connection.First(&role, "role_id=?",id).Error
+func (db *roleRepository) GetRole(id string) (role model.Role, err error) {
+	return role, db.connection.First(&role, "role_id=?", id).Error
 }
 
-func (db* roleRepository) AddRole(role model.Role) (model.Role, error){
+func (db *roleRepository) AddRole(role model.Role) (model.Role, error) {
 	return role, db.connection.Create(&role).Error
 }
 
-func (db* roleRepository) GetRoleByName(roleName string) (role model.Role, err error){
+func (db *roleRepository) GetRoleByName(roleName string) (role model.Role, err error) {
 	return role, db.connection.First(&role, "role_name=?", roleName).Error
 }
