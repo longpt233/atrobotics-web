@@ -4,6 +4,7 @@ import (
 	"atro/internal/helper"
 	"atro/internal/model"
 	"atro/internal/model/request"
+	"atro/internal/model/response"
 	"atro/internal/repository"
 	"encoding/json"
 	"errors"
@@ -86,14 +87,11 @@ func (h *orderHandler) GetOrderProduct(ctx *gin.Context) {
 
 func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 
-	// sortBy is expected to look like field.orderdirection i. e. id.asc
-	sortBy := ctx.Param("sort-by")
-	if sortBy == "" {
-		// id.asc is the default sort query
-		sortBy = "order_id.asc"
-	}
-
 	// tạo query sort
+	sortBy := ctx.Query("sort-by")
+	if sortBy == "" {
+		sortBy = "order_id.asc" // sortBy is expected to look like field.orderdirection i. e. id.asc
+	}
 	sortQuery, err := validateAndReturnSortQuery(sortBy)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid param sort", err.Error()))
@@ -101,9 +99,9 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	}
 
 	// tao query limit
-	strLimit := ctx.Param("limit")
-	// with a value as -1 for gorms Limit method, we'll get a request without limit as default
-	limit := -1
+	strLimit := ctx.Query("limit")
+	fmt.Println("param limit",strLimit)	
+	limit := -1 // with a value as -1 for gorms Limit method, we'll get a request without limit as default
 	if strLimit != "" {
 		limit, err = strconv.Atoi(strLimit)
 		if err != nil || limit < -1 {
@@ -113,7 +111,7 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	}
 
 	// tạo query offset
-	strOffset := ctx.Param("offset")
+	strOffset := ctx.Query("offset")
 	offset := -1
 	if strOffset != "" {
 		offset, err = strconv.Atoi(strOffset)
@@ -124,7 +122,7 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	}
 
 	// tạo query filter
-	filter := ctx.Param("filter")
+	filter := ctx.Query("filter") 
 	filterMap := map[string]interface{}{}
 	if filter != "" {
 		filterMap, err = validateAndReturnFilterMap(filter)
@@ -142,10 +140,17 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	}
 
 	// trả về thành công
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsOrders))
+	res := response.OrderResponse{
+		Orders: rsOrders,
+		OrdersLength: len(rsOrders),
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", res))
 }
 
 func (h *orderHandler) UpdateOrderProduct(ctx *gin.Context) {
+
+	
+
 }
 
 func (h *orderHandler) OrderRequestToOrder(orderForm *request.OrderRequest, userId string) (model.Order, error) {
@@ -189,6 +194,7 @@ func getOrderFields() []string {
 	return field
 }
 
+// check xem query có trogn các trường
 func stringInSlice(strSlice []string, s string) bool {
 	for _, v := range strSlice {
 		if v == s {
@@ -198,6 +204,7 @@ func stringInSlice(strSlice []string, s string) bool {
 	return false
 }
 
+// build câu query sort
 func validateAndReturnSortQuery(sortBy string) (string, error) {
 	splits := strings.Split(sortBy, ".")
 	if len(splits) != 2 {
@@ -213,6 +220,7 @@ func validateAndReturnSortQuery(sortBy string) (string, error) {
 	return fmt.Sprintf("%s %s", field, strings.ToUpper(order)), nil
 }
 
+// build câu query filter
 func validateAndReturnFilterMap(filter string) (map[string]interface{}, error) {
 	splits := strings.Split(filter, ".")
 	if len(splits) != 2 {
