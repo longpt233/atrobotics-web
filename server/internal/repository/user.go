@@ -10,6 +10,7 @@ type UserRepository interface {
 	GetUserByEmail(string) (model.User, error)
 	GetUser(string) (model.User, error)
 	AddUser(user model.User) (model.User, error)
+	UpdateUser(user model.User) (model.User, error)
 }
 
 type userRepository struct {
@@ -33,4 +34,11 @@ func (db *userRepository) AddUser(user model.User) (model.User, error) {
 
 func (db *userRepository) GetUserByEmail(email string) (user model.User, err error) {
 	return user, db.connection.First(&user, "user_email=?", email).Error
+}
+func (db *userRepository) UpdateUser(user model.User) (model.User, error){
+	var checkUser model.User
+	if err := db.connection.First(&checkUser, "user_id = ?",user.UserID).Error; err != nil {
+		return checkUser, err
+	}
+	return user, db.connection.Model(&user).Where(model.User{UserID: user.UserID}).Updates(&user).Error
 }

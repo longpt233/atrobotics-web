@@ -47,6 +47,7 @@ func RunAPI(address string) error {
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
 		userAuth.GET("/info", userHandler.GetUser)
 		userAuth.PUT("/info", userHandler.UpdateUser)
+		userAuth.POST("/change-password", userHandler.ChangePassword)
 
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
