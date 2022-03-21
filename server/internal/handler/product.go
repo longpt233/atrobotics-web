@@ -105,7 +105,7 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 	// tạo query sort
 	sortBy := ctx.Query("sort-by")
 	if sortBy == "" {
-		sortBy = "order_id.asc" // sortBy is expected to look like field.orderdirection i. e. id.asc
+		sortBy = "product_id.asc" // sortBy is expected to look like field.orderdirection i. e. id.asc
 	}
 	sortQuery, err := helper.ValidateAndReturnSortQuery(model.Product{}, sortBy)
 	if err != nil {
@@ -148,16 +148,24 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 	}
 
 	// gửi query
-	rsOrders, err := h.repo.GetAllProductWithOptions(filterMap, limit, offset, sortQuery)
+	products, err := h.repo.GetAllProductWithOptions(filterMap, limit, offset, sortQuery)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "not found !", err.Error()))
 		return
 	}
 
 	// trả về thành công
-	res := response.OrderResponse{
-		Orders:       rsOrders,
-		OrdersLength: len(rsOrders),
+	var rsProducts []response.ProductResponse
+	for i := 0; i < len(products); i++ {
+		var p response.ProductResponse
+		p, err := p.ProductToProductResponse(products[i])
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to array", err.Error()))
+			return
+		}
+		rsProducts = append(rsProducts, p)
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", res))
+
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsProducts))
+
 }
