@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 //FileUploadHandler -> Interface to File Upload
@@ -23,15 +24,17 @@ func SingleFile(c *gin.Context) {
 		return
 	}
 
-	savePath := os.Getenv("IMAGE_SAVE_PATH")
-	log.Println(file.Filename+"save at: "+ savePath)
+	nameFile := uuid.NewString()
 
-	err = c.SaveUploadedFile(file, savePath+file.Filename)
+	savePath := os.Getenv("IMAGE_SAVE_PATH")
+	log.Println(file.Filename + "save at: " + savePath)
+
+	err = c.SaveUploadedFile(file, savePath+ nameFile)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "lấy dc ảnh nhưng lỗi cmnr khi savefile", err.Error()))
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.BuildResponse(1, "get file done", "file-name:"+file.Filename))
+	c.JSON(http.StatusOK, helper.BuildResponse(1, "get file done", nameFile))
 
 }
