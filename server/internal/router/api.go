@@ -59,7 +59,8 @@ func RunAPI(address string) error {
 		// unauthorize api
 
 		// authorize api
-		adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+		// adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+		adminAuth := adminRouter.Group("/auth")
 
 		// category
 		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)

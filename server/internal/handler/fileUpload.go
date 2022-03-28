@@ -22,7 +22,7 @@ func SingleFile(c *gin.Context) {
 
 	file, err := c.FormFile("image")
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("get form file "+ err.Error())
 		c.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "gửi lên tao có thấy gì đâu ?", err.Error()))
 		return
 	}
@@ -37,7 +37,7 @@ func SingleFile(c *gin.Context) {
 
 	err = c.SaveUploadedFile(file, savePath+nameFile+"."+ext)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("save err" + err.Error())
 		c.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "lấy dc ảnh nhưng lỗi cmnr khi savefile", err.Error()))
 		return
 	}
