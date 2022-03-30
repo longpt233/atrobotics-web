@@ -13,6 +13,8 @@ func RunAPI(address string) error {
 
 	r := gin.Default()
 
+	// r.Use(cors.AllowAll())
+
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
 	})
@@ -42,14 +44,12 @@ func RunAPI(address string) error {
 
 		// authorize api
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
-
-		// lấy,xửa,xóa thông tin user
-		userAuth.GET("/profiles/:id", userHandler.GetUser)
-		userAuth.PUT("/profiles/:id", nil)
-		userAuth.DELETE("/profiles/", nil)
+		userAuth.GET("/info", userHandler.GetUser)
+		userAuth.PUT("/info", userHandler.UpdateUser)
+		userAuth.POST("/change-password", userHandler.ChangePassword)
 
 		// create order . chỉ cho tạo
-		userAuth.POST("/order", orderHandler.OrderProduct)  // gửi lên cái là chốt đơn. 
+		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
 
 	}
 
@@ -59,7 +59,8 @@ func RunAPI(address string) error {
 		// unauthorize api
 
 		// authorize api
-		adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+		// adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+		adminAuth := adminRouter.Group("/auth")
 
 		// category
 		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)
@@ -72,15 +73,14 @@ func RunAPI(address string) error {
 		adminAuth.PUT("/products/:id", productHandler.UpdateProduct)
 
 		// order info. không cho del, k cho tạo
-		adminAuth.GET("/order", orderHandler.GetAllOrderProduct)
-		adminAuth.GET("/order:id", orderHandler.GetOrderProduct)
-		adminAuth.PUT("/order:id", orderHandler.UpdateOrderProduct)
+		adminAuth.GET("/orders", orderHandler.GetAllOrderProduct)
+		adminAuth.GET("/orders/:id", orderHandler.GetOrderProduct)
+		adminAuth.PUT("/orders/:id", orderHandler.UpdateOrderProduct)
 
 		// upload file
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)
 
 	}
-
 	return r.Run(address)
 
 }

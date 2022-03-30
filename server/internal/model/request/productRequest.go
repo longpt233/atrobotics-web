@@ -13,7 +13,7 @@ type ProductRequest struct {
 	ProductColor  []string `json:"product_color"`
 }
 
-func (p *ProductRequest) ProductRequestToProduct() (model.Product, error){
+func (p *ProductRequest) ProductRequestToProduct() (model.Product, error) {
 	productImg, err := json.Marshal(p.ProductImages)
 	if err != nil {
 		return model.Product{}, err
