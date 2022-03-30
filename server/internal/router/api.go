@@ -42,7 +42,11 @@ func RunAPI(address string) error {
 
 		// authorize api
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
-		userAuth.GET("", userHandler.GetUser)
+
+		// lấy,xửa,xóa thông tin user
+		userAuth.GET("/profiles/:id", userHandler.GetUser)
+		userAuth.PUT("/profiles/:id", nil)
+		userAuth.DELETE("/profiles/", nil)
 
 		// create order . chỉ cho tạo
 		userAuth.POST("/order", orderHandler.OrderProduct)  // gửi lên cái là chốt đơn. 
