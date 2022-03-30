@@ -3,7 +3,6 @@ package router
 import (
 	"atro/internal/handler"
 	"atro/internal/middleware"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -83,4 +82,3 @@ func RunAPI(address string) error {
 	return r.Run(address)
 
 }
-
