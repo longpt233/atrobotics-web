@@ -4,9 +4,10 @@ import (
 	"atro/internal/handler"
 	"atro/internal/middleware"
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	cors "github.com/rs/cors/wrapper/gin"
 )
 
 //RunAPI ->route setup
@@ -14,8 +15,17 @@ func RunAPI(address string) error {
 
 	r := gin.Default()
 
-	r.Use(cors.Default())
-
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://atroboticsvn.com"},
+		AllowMethods:     []string{"PUT", "PATCH"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "http://atroboticsvn.com"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
 	})
