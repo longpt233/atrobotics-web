@@ -6,6 +6,7 @@ async function getProductList() {
     {
       headers: {
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Origin,Content-Length,Content-Type'
       },
     },
   );
