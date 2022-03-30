@@ -3,6 +3,7 @@ package router
 import (
 	"atro/internal/handler"
 	"atro/internal/middleware"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -92,6 +93,7 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
+			fmt.Println("via cors ",c.Request.Method)
 			return
 		}
 
