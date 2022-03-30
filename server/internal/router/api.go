@@ -5,11 +5,7 @@ import (
 	"atro/internal/middleware"
 	"net/http"
 
-	"time"
-
 	"github.com/gin-gonic/gin"
-
-	"github.com/gin-contrib/cors"
 )
 
 //RunAPI ->route setup
@@ -17,20 +13,11 @@ func RunAPI(address string) error {
 
 	r := gin.Default()
 
-	r.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://atroboticsvn.com"},
-        AllowMethods:     []string{"PUT", "PATCH","GET","POST", "OPTIONS"},
-        AllowHeaders:     []string{"Origin"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-        MaxAge: 12 * time.Hour,
-    }))
-
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
 	})
 
-	apiRoutes := r.Group("/api/v1")
+	apiRoutes := r.Group("/api/v1", CORSMiddleware())
 
 	productHandler := handler.NewProductHandler()
 	productCategoryHandler := handler.NewProductCategoryHandler()
@@ -94,4 +81,20 @@ func RunAPI(address string) error {
 	}
 	return r.Run(address)
 
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }
