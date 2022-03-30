@@ -18,7 +18,7 @@ func RunAPI(address string) error {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
 	})
 
-	apiRoutes := r.Group("/api/v1", CORSMiddleware())
+	apiRoutes := r.Group("/api/v1")
 
 	productHandler := handler.NewProductHandler()
 	productCategoryHandler := handler.NewProductCategoryHandler()
@@ -84,19 +84,3 @@ func RunAPI(address string) error {
 
 }
 
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			fmt.Println("via cors ",c.Request.Method)
-			return
-		}
-
-		c.Next()
-	}
-}
