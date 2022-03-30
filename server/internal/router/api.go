@@ -19,7 +19,7 @@ func RunAPI(address string) error {
 
 	r.Use(cors.New(cors.Config{
         AllowOrigins:     []string{"http://atroboticsvn.com"},
-        AllowMethods:     []string{"PUT", "PATCH","GET","POST"},
+        AllowMethods:     []string{"PUT", "PATCH","GET","POST", "OPTIONS"},
         AllowHeaders:     []string{"Origin"},
         ExposeHeaders:    []string{"Content-Length"},
         AllowCredentials: true,
