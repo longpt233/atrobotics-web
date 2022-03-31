@@ -4,14 +4,12 @@ import (
 	"atro/internal/helper"
 	"atro/internal/model"
 	"atro/internal/model/request"
+	"atro/internal/model/response"
 	"atro/internal/repository"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +37,7 @@ func NewOrderHandler() OrderHandler {
 	}
 }
 
-func (h *orderHandler) OrderProduct(ctx *gin.Context) {
+func (h *orderHandler) OrderProduct(ctx *gin.Context) { // TODO: transaction?
 	// lấy thông tin order từ request
 	var orderForm request.OrderRequest
 	if err := ctx.ShouldBindJSON(&orderForm); err != nil {
@@ -86,24 +84,21 @@ func (h *orderHandler) GetOrderProduct(ctx *gin.Context) {
 
 func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 
-	// sortBy is expected to look like field.orderdirection i. e. id.asc
-	sortBy := ctx.Param("sort-by")
-	if sortBy == "" {
-		// id.asc is the default sort query
-		sortBy = "order_id.asc"
-	}
-
 	// tạo query sort
-	sortQuery, err := validateAndReturnSortQuery(sortBy)
+	sortBy := ctx.Query("sort-by")
+	if sortBy == "" {
+		sortBy = "order_id.asc" // sortBy is expected to look like field.orderdirection i. e. id.asc
+	}
+	sortQuery, err := helper.ValidateAndReturnSortQuery(model.Order{}, sortBy)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid param sort", err.Error()))
 		return
 	}
 
 	// tao query limit
-	strLimit := ctx.Param("limit")
-	// with a value as -1 for gorms Limit method, we'll get a request without limit as default
-	limit := -1
+	strLimit := ctx.Query("limit")
+	fmt.Println("param limit", strLimit)
+	limit := -1 // with a value as -1 for gorms Limit method, we'll get a request without limit as default
 	if strLimit != "" {
 		limit, err = strconv.Atoi(strLimit)
 		if err != nil || limit < -1 {
@@ -113,7 +108,7 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	}
 
 	// tạo query offset
-	strOffset := ctx.Param("offset")
+	strOffset := ctx.Query("offset")
 	offset := -1
 	if strOffset != "" {
 		offset, err = strconv.Atoi(strOffset)
@@ -124,10 +119,10 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	}
 
 	// tạo query filter
-	filter := ctx.Param("filter")
+	filter := ctx.Query("filter")
 	filterMap := map[string]interface{}{}
 	if filter != "" {
-		filterMap, err = validateAndReturnFilterMap(filter)
+		filterMap, err = helper.ValidateAndReturnFilterMap(model.Order{}, filter)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid filter param ", err.Error()))
 			return
@@ -142,10 +137,15 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	}
 
 	// trả về thành công
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsOrders))
+	res := response.OrderResponse{
+		Orders:       rsOrders,
+		OrdersLength: len(rsOrders),
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", res))
 }
 
 func (h *orderHandler) UpdateOrderProduct(ctx *gin.Context) {
+
 }
 
 func (h *orderHandler) OrderRequestToOrder(orderForm *request.OrderRequest, userId string) (model.Order, error) {
@@ -177,50 +177,4 @@ func (h *orderHandler) OrderRequestToOrder(orderForm *request.OrderRequest, user
 		OrderStatus:    orderForm.TypeOrder,
 	}
 	return order, nil
-}
-
-// lấy các trường ra để validate query
-func getOrderFields() []string {
-	var field []string
-	v := reflect.ValueOf(model.Order{})
-	for i := 0; i < v.Type().NumField(); i++ {
-		field = append(field, v.Type().Field(i).Tag.Get("json"))
-	}
-	return field
-}
-
-func stringInSlice(strSlice []string, s string) bool {
-	for _, v := range strSlice {
-		if v == s {
-			return true
-		}
-	}
-	return false
-}
-
-func validateAndReturnSortQuery(sortBy string) (string, error) {
-	splits := strings.Split(sortBy, ".")
-	if len(splits) != 2 {
-		return "", errors.New("malformed sortBy query parameter, should be field.orderdirection")
-	}
-	field, order := splits[0], splits[1]
-	if order != "desc" && order != "asc" {
-		return "", errors.New("malformed orderdirection in sortBy query parameter, should be asc or desc")
-	}
-	if !stringInSlice(getOrderFields(), field) {
-		return "", errors.New("unknown field in sortBy query parameter")
-	}
-	return fmt.Sprintf("%s %s", field, strings.ToUpper(order)), nil
-}
-
-func validateAndReturnFilterMap(filter string) (map[string]interface{}, error) {
-	splits := strings.Split(filter, ".")
-	if len(splits) != 2 {
-		return nil, errors.New("malformed sortBy query parameter, should be field.orderdirection")
-	}
-	field, value := splits[0], splits[1]
-	if !stringInSlice(getOrderFields(), field) {
-		return nil, errors.New("unknown field in filter query parameter")
-	}
-	return map[string]interface{}{field: value}, nil
 }

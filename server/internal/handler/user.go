@@ -18,6 +18,7 @@ type UserHandler interface {
 	SignInUser(*gin.Context)
 	GetUser(*gin.Context)
 	UpdateUser(*gin.Context)
+	ChangePassword(*gin.Context)
 }
 
 type userHandler struct {
@@ -97,7 +98,7 @@ func (h *userHandler) SignInUser(ctx *gin.Context) {
 }
 
 func (h *userHandler) GetUser(ctx *gin.Context) {
-	
+
 	if userID, isExist := ctx.Get("userID"); isExist {
 		checkUser, err := repository.NewUserRepository().GetUser(fmt.Sprint(userID))
 		if err == nil {
@@ -124,6 +125,54 @@ func (h *userHandler) GetUser(ctx *gin.Context) {
 
 func (h *userHandler) UpdateUser(ctx *gin.Context) {
 
+}
+
+func (h *userHandler) ChangePassword(ctx *gin.Context) {
+
+	if userID, isExist := ctx.Get("userID"); isExist {
+		checkUser, err := repository.NewUserRepository().GetUser(fmt.Sprint(userID))
+		if err == nil {
+			role, err := repository.NewRoleRepository().GetRole(checkUser.UserRoleID)
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find ROLE", err.Error()))
+				return
+			} else {
+				if role.RoleName == "USER" {
+					var changePassForm request.ChangePasswordForm
+					if err := ctx.ShouldBindJSON(&changePassForm); err != nil {
+						ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid input format", err.Error()))
+						return
+					}
+					fmt.Print(checkUser.UserPassword)
+					isAuth := comparePass(checkUser.UserPassword, changePassForm.OldPassword)
+					if !isAuth {
+						ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "old password not match", err.Error()))
+						return
+					} else {
+						var requestUser model.User
+						requestUser.UserID = checkUser.UserID
+						requestUser.UserPassword = changePassForm.NewPassword
+						hashPass(&requestUser.UserPassword)
+						updateUser, err := h.repo.UpdateUser(requestUser)
+						if err != nil {
+							ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when update password for user", err.Error()))
+							return
+						}
+						updateUser.UserPassword = ""
+						ctx.JSON(http.StatusOK, helper.BuildResponse(1, "update password successfully", updateUser))
+					}
+
+				} else {
+					ctx.AbortWithStatusJSON(http.StatusForbidden, helper.BuildResponse(-1, "only with USER role", ""))
+					return
+				}
+			}
+		} else {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find USER", err.Error()))
+		}
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, helper.BuildResponse(-1, "Not Exist session", ""))
+	}
 }
 
 func hashPass(pass *string) {

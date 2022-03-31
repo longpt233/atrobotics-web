@@ -5,16 +5,21 @@ import (
 	"atro/internal/middleware"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	cors "github.com/rs/cors/wrapper/gin"
+	// cors "github.com/rs/cors/wrapper/gin"
 )
 
 //RunAPI ->route setup
 func RunAPI(address string) error {
 
 	r := gin.Default()
-
 	r.Use(cors.Default())
+
+	// config := cors.DefaultConfig()
+	// config.AllowAllOrigins = true
+
+	// r.Use(cors.New(config))
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
@@ -29,6 +34,7 @@ func RunAPI(address string) error {
 
 	// api cho user
 	userRoutes := apiRoutes.Group("/user")
+	// userRoutes.Use(cors.Default())
 	{
 		// unauthorize api
 
@@ -38,7 +44,7 @@ func RunAPI(address string) error {
 		userRoutes.POST("/logout", nil)
 
 		// xem liên quan
-		userRoutes.GET("/products/", productHandler.GetAllProduct)
+		userRoutes.GET("/products", productHandler.GetAllProduct)
 		userRoutes.GET("/products/:id", productHandler.GetProduct)
 		userRoutes.GET("/categories/", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
@@ -47,6 +53,7 @@ func RunAPI(address string) error {
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
 		userAuth.GET("/info", userHandler.GetUser)
 		userAuth.PUT("/info", userHandler.UpdateUser)
+		userAuth.POST("/change-password", userHandler.ChangePassword)
 
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
@@ -59,7 +66,8 @@ func RunAPI(address string) error {
 		// unauthorize api
 
 		// authorize api
-		adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+		// adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+		adminAuth := adminRouter.Group("/auth")
 
 		// category
 		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)
