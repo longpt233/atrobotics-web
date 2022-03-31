@@ -22,7 +22,7 @@ func RunAPI(address string) error {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-			return origin == "*"
+			return origin == "http://localhost:8081"
 		},
 		MaxAge: 12 * time.Hour,
 	}))
