@@ -18,13 +18,13 @@ func RunAPI(address string) error {
 	// config.AllowAllOrigins = true
 
 	// r.Use(cors.New(config))
-	r.Use(corsMiddleware())
+	// r.Use(corsMiddleware())
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
 	})
 
-	apiRoutes := r.Group("/api/v1")
+	apiRoutes := r.Group("/api/v1",corsMiddleware())
 
 	productHandler := handler.NewProductHandler()
 	productCategoryHandler := handler.NewProductCategoryHandler()
@@ -101,8 +101,9 @@ func corsMiddleware() gin.HandlerFunc {
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(200)
-		} else {
-			c.Next()
 		}
+
+		c.Next()
+	
 	}
 }
