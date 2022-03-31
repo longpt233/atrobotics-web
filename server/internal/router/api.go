@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	cors "github.com/rs/cors/wrapper/gin"
+	"github.com/rs/cors"
 )
 
 //RunAPI ->route setup
@@ -15,7 +15,6 @@ func RunAPI(address string) error {
 	r := gin.Default()
 
 	r.Use(cors.Default())
-	r.Use(gin.Logger())
 	// r.Use(corsMiddleware())
 
 	r.GET("/", func(ctx *gin.Context) {
