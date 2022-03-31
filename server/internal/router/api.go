@@ -5,8 +5,8 @@ import (
 	"atro/internal/middleware"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/cors"
 )
 
 //RunAPI ->route setup
