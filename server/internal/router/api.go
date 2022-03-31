@@ -3,12 +3,10 @@ package router
 import (
 	"atro/internal/handler"
 	"atro/internal/middleware"
-	"fmt"
 	"net/http"
 
-	// "github.com/gin-contrib/cors"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-
 	// cors "github.com/rs/cors/wrapper/gin"
 )
 
@@ -16,19 +14,18 @@ import (
 func RunAPI(address string) error {
 
 	r := gin.Default()
-	// r.Use(cors.Default())
+	r.Use(cors.Default())
 
 	// config := cors.DefaultConfig()
 	// config.AllowAllOrigins = true
 
 	// r.Use(cors.New(config))
 
-
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
 	})
 
-	apiRoutes := r.Group("/api/v1") 
+	apiRoutes := r.Group("/api/v1")
 
 	productHandler := handler.NewProductHandler()
 	productCategoryHandler := handler.NewProductCategoryHandler()
@@ -36,7 +33,8 @@ func RunAPI(address string) error {
 	orderHandler := handler.NewOrderHandler()
 
 	// api cho user
-	userRoutes := apiRoutes.Group("/user",corsMiddleware())
+	userRoutes := apiRoutes.Group("/user")
+	// userRoutes.Use(cors.Default())
 	{
 		// unauthorize api
 
@@ -46,13 +44,13 @@ func RunAPI(address string) error {
 		userRoutes.POST("/logout", nil)
 
 		// xem liên quan
-		userRoutes.GET("/products/", productHandler.GetAllProduct)
+		userRoutes.GET("/products", productHandler.GetAllProduct)
 		userRoutes.GET("/products/:id", productHandler.GetProduct)
 		userRoutes.GET("/categories/", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
 
 		// authorize api
-		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT(),corsMiddleware())
+		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
 		userAuth.GET("/info", userHandler.GetUser)
 		userAuth.PUT("/info", userHandler.UpdateUser)
 		userAuth.POST("/change-password", userHandler.ChangePassword)
@@ -69,7 +67,7 @@ func RunAPI(address string) error {
 
 		// authorize api
 		// adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
-		adminAuth := adminRouter.Group("/auth",corsMiddleware())
+		adminAuth := adminRouter.Group("/auth")
 
 		// category
 		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)
@@ -92,21 +90,4 @@ func RunAPI(address string) error {
 	}
 	return r.Run(address)
 
-}
-
-func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-
-		fmt.Println("via midddleware")
-
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(200)
-		}
-
-		c.Next()
-	}
 }
