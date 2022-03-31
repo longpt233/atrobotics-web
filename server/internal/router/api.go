@@ -23,13 +23,13 @@ func RunAPI(address string) error {
 
 	// r.Use(cors.New(config))
 
-	r.Use(corsMiddleware())
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
 	})
 
 	apiRoutes := r.Group("/api/v1")
+	apiRoutes.Use(corsMiddleware())
 
 	productHandler := handler.NewProductHandler()
 	productCategoryHandler := handler.NewProductCategoryHandler()
