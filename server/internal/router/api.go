@@ -28,8 +28,7 @@ func RunAPI(address string) error {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
 	})
 
-	apiRoutes := r.Group("/api/v1")
-	apiRoutes.Use(corsMiddleware())
+	apiRoutes := r.Group("/api/v1") 
 
 	productHandler := handler.NewProductHandler()
 	productCategoryHandler := handler.NewProductCategoryHandler()
@@ -37,7 +36,7 @@ func RunAPI(address string) error {
 	orderHandler := handler.NewOrderHandler()
 
 	// api cho user
-	userRoutes := apiRoutes.Group("/user")
+	userRoutes := apiRoutes.Group("/user",corsMiddleware())
 	{
 		// unauthorize api
 
@@ -53,7 +52,7 @@ func RunAPI(address string) error {
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
 
 		// authorize api
-		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
+		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT(),corsMiddleware())
 		userAuth.GET("/info", userHandler.GetUser)
 		userAuth.PUT("/info", userHandler.UpdateUser)
 		userAuth.POST("/change-password", userHandler.ChangePassword)
@@ -70,7 +69,7 @@ func RunAPI(address string) error {
 
 		// authorize api
 		// adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
-		adminAuth := adminRouter.Group("/auth")
+		adminAuth := adminRouter.Group("/auth",corsMiddleware())
 
 		// category
 		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)
