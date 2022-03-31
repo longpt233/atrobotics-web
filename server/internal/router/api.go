@@ -5,6 +5,7 @@ import (
 	"atro/internal/middleware"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,6 +19,8 @@ func RunAPI(address string) error {
 
 	// r.Use(cors.New(config))
 	// r.Use(corsMiddleware())
+
+	r.Use(cors.Default())
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
