@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	cors "github.com/rs/cors/wrapper/gin"
 )
 
 //RunAPI ->route setup
@@ -13,9 +14,9 @@ func RunAPI(address string) error {
 
 	r := gin.Default()
 
-	// r.Use(cors.Default())
+	r.Use(cors.Default())
 	r.Use(gin.Logger())
-	r.Use(corsMiddleware())
+	// r.Use(corsMiddleware())
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
@@ -87,17 +88,17 @@ func RunAPI(address string) error {
 
 }
 
-func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+// func corsMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
 
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*") 
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")  
+// 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+// 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
+// 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(200)
-		} else {
-			c.Next()
-		}
-	}
-}
+// 		if c.Request.Method == "OPTIONS" {
+// 			c.AbortWithStatus(200)
+// 		} else {
+// 			c.Next()
+// 		}
+// 	}
+// }
