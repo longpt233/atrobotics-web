@@ -107,5 +107,6 @@ func corsMiddleware() gin.HandlerFunc {
 			c.AbortWithStatus(200)
 		}
 
+		c.Next()
 	}
 }
