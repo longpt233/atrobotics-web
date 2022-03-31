@@ -3,6 +3,7 @@ package router
 import (
 	"atro/internal/handler"
 	"atro/internal/middleware"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -91,6 +92,8 @@ func RunAPI(address string) error {
 
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		fmt.Println("via midddleware")
 
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, UPDATE")
