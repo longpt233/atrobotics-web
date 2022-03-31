@@ -5,7 +5,7 @@ async function getProductList() {
     'http://atroboticsvn.com/api/v1/user/products?limit=3&offset=1',
     {
       headers: {
-        'Access-Control-Allow-Origin': 'Origin'
+        'Access-Control-Allow-Origin': '*'
       },
     },
   );
