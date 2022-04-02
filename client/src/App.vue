@@ -3,12 +3,6 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
   </nav> -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@1,200&family=Roboto&display=swap"
-    rel="stylesheet"
-  />
   <router-view />
 </template>
 
