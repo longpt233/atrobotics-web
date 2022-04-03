@@ -1,21 +1,26 @@
 <template>
   <div class="container-fluid bg-primary">
-    <div class="container">
-      <div class="d-flex justify-content-between p-3">
-        <div class="d-flex align-items-center">
-          <img src="@/assets/images/icon-email.png" class="me-2 mb-1" />
-          <div class="me-5"><strong>tester123@gmail.com</strong></div>
-          <img src="@/assets/images/icon-phone.png" class="me-2 mb-1" />
-          <div><strong>0123456789</strong></div>
+    <div class="container d-flex justify-content-between p-2">
+      <div class="d-flex align-items-center">
+        <div class="ms-1 me-5">
+          <img class="me-2 mb-1" src="@/assets/images/icon-email.svg" />
+          <strong>tester123@gmail.com</strong>
         </div>
-
-        <div class="d-flex align-items-center justify-content-center">
-          <div class="button button-login me-2"><strong>Login</strong></div>
-          <img src="@/assets/images/icon-user.png" class="me-4 mb-1" />
-          <div class="button button-wishlist me-2"><strong>Wishlist</strong></div>
-          <img src="@/assets/images/icon-favourite.png" class="me-4 mb-1" />
-          <img src="@/assets/images/icon-cart.png" class="button button-wishlist mb-1" />
+        <div>
+          <img class="me-2 mb-1" src="@/assets/images/icon-phone.svg" />
+          <strong>0123456789</strong>
         </div>
+      </div>
+      <div class="d-flex align-items-center">
+        <div class="button">
+          <strong>Đăng nhập</strong>
+          <img class="ms-2 me-4 mb-1" src="@/assets/images/icon-user.svg" />
+        </div>
+        <img
+          class="button mb-1 me-2"
+          src="@/assets/images/icon-cart.svg"
+          style="width: 24px; height: auto"
+        />
       </div>
     </div>
   </div>
@@ -27,17 +32,15 @@ export default {};
 
 <style lang="scss" scoped>
 * {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 16px;
   color: $color-white;
 }
 
-img {
-  width: 16px;
-  height: 16px;
-}
-
 .button {
-  cursor: pointer;
+  img {
+    width: 16px;
+    height: auto;
+  }
 }
 </style>
