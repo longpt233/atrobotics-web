@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 class HomeApiService {
   async getProductList() {
     let response;

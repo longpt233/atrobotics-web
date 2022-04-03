@@ -5,26 +5,21 @@ import (
 	"atro/internal/middleware"
 	"net/http"
 
-	"time"
-
-	"github.com/gin-gonic/gin"
-
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	// cors "github.com/rs/cors/wrapper/gin"
 )
 
 //RunAPI ->route setup
 func RunAPI(address string) error {
 
 	r := gin.Default()
+	r.Use(cors.Default())
 
-	r.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://atroboticsvn.com"},
-        AllowMethods:     []string{"PUT", "PATCH","GET","POST", "OPTIONS"},
-        AllowHeaders:     []string{"Origin"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-        MaxAge: 12 * time.Hour,
-    }))
+	// config := cors.DefaultConfig()
+	// config.AllowAllOrigins = true
+
+	// r.Use(cors.New(config))
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
@@ -36,9 +31,11 @@ func RunAPI(address string) error {
 	productCategoryHandler := handler.NewProductCategoryHandler()
 	userHandler := handler.NewUserHandler()
 	orderHandler := handler.NewOrderHandler()
+	bannerHandler := handler.NewBannerHandler()
 
 	// api cho user
 	userRoutes := apiRoutes.Group("/user")
+	// userRoutes.Use(cors.Default())
 	{
 		// unauthorize api
 
@@ -48,10 +45,13 @@ func RunAPI(address string) error {
 		userRoutes.POST("/logout", nil)
 
 		// xem liên quan
-		userRoutes.GET("/products/", productHandler.GetAllProduct)
+		userRoutes.GET("/products", productHandler.GetAllProduct)
 		userRoutes.GET("/products/:id", productHandler.GetProduct)
 		userRoutes.GET("/categories/", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
+
+		// get banner
+		userRoutes.GET("/banners/:id", bannerHandler.GetBanner)
 
 		// authorize api
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
@@ -61,6 +61,8 @@ func RunAPI(address string) error {
 
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
+
+		
 
 	}
 
@@ -90,6 +92,9 @@ func RunAPI(address string) error {
 
 		// upload file
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)
+
+		//add banner
+		adminAuth.POST("/banners/", bannerHandler.AddBanner)
 
 	}
 	return r.Run(address)
