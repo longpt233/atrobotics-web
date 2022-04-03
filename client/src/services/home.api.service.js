@@ -1,10 +1,18 @@
 import axios from 'axios';
-
-async function getProductList() {
-  const response = await axios.get(
-    'http://atroboticsvn.com/api/v1/user/products?limit=3&offset=1'
-  );
-  return response.data;
+class HomeApiService {
+  async getProductList() {
+    let response;
+    try {
+      response = await axios.get(
+        'http://atroboticsvn.com/api/v1/user/products?limit=3&offset=1',
+      );
+    } catch (error) {
+      return;
+    }
+    return response;
+  }
 }
 
-export const productList = getProductList();
+const homeApiService = new HomeApiService();
+
+export default homeApiService;

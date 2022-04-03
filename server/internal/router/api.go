@@ -31,6 +31,7 @@ func RunAPI(address string) error {
 	productCategoryHandler := handler.NewProductCategoryHandler()
 	userHandler := handler.NewUserHandler()
 	orderHandler := handler.NewOrderHandler()
+	bannerHandler := handler.NewBannerHandler()
 
 	// api cho user
 	userRoutes := apiRoutes.Group("/user")
@@ -49,6 +50,9 @@ func RunAPI(address string) error {
 		userRoutes.GET("/categories/", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
 
+		// get banner
+		userRoutes.GET("/banners/:id", bannerHandler.GetBanner)
+
 		// authorize api
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
 		userAuth.GET("/info", userHandler.GetUser)
@@ -57,6 +61,8 @@ func RunAPI(address string) error {
 
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
+
+		
 
 	}
 
@@ -86,6 +92,9 @@ func RunAPI(address string) error {
 
 		// upload file
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)
+
+		//add banner
+		adminAuth.POST("/banners/", bannerHandler.AddBanner)
 
 	}
 	return r.Run(address)
