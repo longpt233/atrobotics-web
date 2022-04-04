@@ -17,6 +17,7 @@ type BannerHandler interface {
 	AddBanner(*gin.Context)
 	UpdateBanner(*gin.Context)
 	DeleteBanner(*gin.Context)
+	GetTop3NewestBanner(*gin.Context)
 }
 
 type bannerHandler struct {
@@ -88,4 +89,12 @@ func (h *bannerHandler) DeleteBanner(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "delete banner successfully!", banner))
 
+}
+func (h *bannerHandler) GetTop3NewestBanner(ctx *gin.Context){
+	listBanner, err := h.repo.GetTop3NewestBanner()
+	if err != nil{
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when get list banner", err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get top 3 newest banner success fully", listBanner))
 }

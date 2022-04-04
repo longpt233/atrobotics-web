@@ -11,6 +11,7 @@ type BannerRepository interface {
 	AddBanner(model.Banner) (model.Banner, error)
 	UpdateBanner(model.Banner) (model.Banner, error)
 	DeleteBanner(string) (model.Banner, error)
+	GetTop3NewestBanner()([]model.Banner, error)
 }
 
 type bannerRepository struct{
@@ -44,4 +45,7 @@ func (db *bannerRepository) DeleteBanner(id string) (model.Banner, error){
 	}
 	return banner, db.connection.Delete(&banner, "banner_id=?", banner.BannerId).Error
 
+}
+func (db *bannerRepository) GetTop3NewestBanner()(listBanner []model.Banner, err error){
+	return listBanner, db.connection.Order("banner_create_at DESC").Limit(3).Find(&listBanner).Error
 }

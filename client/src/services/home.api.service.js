@@ -1,12 +1,39 @@
-import axios from 'axios';
+import axiosConfig from "../config/axiosConfig"
 class HomeApiService {
-  async getProductList() {
+  /**
+   * API get list product with limit ... and offset ...
+   * @returns response of API
+   */
+  async getProductList(limit, offset) {
     let response;
     try {
-      response = await axios.get(
-        'http://atroboticsvn.com/api/v1/user/products?limit=3&offset=1',
+      response = await axiosConfig.get(
+        `/user/products?limit=${limit}&offset=${offset}`,
       );
     } catch (error) {
+      return;
+    }
+    return response;
+  }
+
+  /**
+   * Get user profile API
+   * @param {String} token 
+   * @returns response of API
+   */
+  async getUserProfile(token){
+    let response;
+    try{
+      response = axiosConfig.get(
+        "/user/auth/info",
+        {
+          headers:{
+            "Authorization": `Bearer ${token}`
+          }
+        }
+      );
+      console.log("get user info token: ", token)
+    }catch(error){
       return;
     }
     return response;

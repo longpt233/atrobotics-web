@@ -52,6 +52,7 @@ func RunAPI(address string) error {
 
 		// get banner
 		userRoutes.GET("/banners/:id", bannerHandler.GetBanner)
+		userRoutes.GET("/banners/top-3-newest", bannerHandler.GetTop3NewestBanner)
 
 		// authorize api
 		userAuth := userRoutes.Group("/auth", middleware.AuthorizeJWT())
@@ -95,6 +96,8 @@ func RunAPI(address string) error {
 
 		//add banner
 		adminAuth.POST("/banners/", bannerHandler.AddBanner)
+		adminAuth.PUT("/banners/:id", bannerHandler.UpdateBanner)
+		adminAuth.DELETE("/banners/:id", bannerHandler.DeleteBanner)
 
 	}
 	return r.Run(address)
