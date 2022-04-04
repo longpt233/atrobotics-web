@@ -22,7 +22,7 @@ export default {
     ...mapActions('home', ['getProductList','getUserProfile']),
     ...mapActions('auth', ['login', 'register']),
     loadData() {
-      this.getProductList({3,1});
+      this.getProductList({limit: 3, offset: 1});
       this.login({ email: 'tuannha@gmail.com', password: 'tuannguvl123' });
       // const testRegisterForm = {
       //   email: 'tester03@gmail.com',

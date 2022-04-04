@@ -63,8 +63,6 @@ func RunAPI(address string) error {
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
 
-		
-
 	}
 
 	// api cho admin
@@ -73,8 +71,8 @@ func RunAPI(address string) error {
 		// unauthorize api
 
 		// authorize api
-		// adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
-		adminAuth := adminRouter.Group("/auth")
+		adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
+		// adminAuth := adminRouter.Group("/auth")
 
 		// category
 		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)
