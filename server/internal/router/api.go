@@ -14,7 +14,11 @@ import (
 func RunAPI(address string) error {
 
 	r := gin.Default()
-	r.Use(cors.Default())
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+
+	r.Use(cors.New(config))
 
 	// config := cors.DefaultConfig()
 	// config.AllowAllOrigins = true

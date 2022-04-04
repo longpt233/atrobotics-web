@@ -33,7 +33,7 @@ export default {
       //   address: 'Ha Noi',
       // };
       // this.register(testRegisterForm);
-      this.getUserProfile("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDg5OTQ0MzQsImlhdCI6MTY0ODk4MzYzNCwidXNlcklEIjoiOTA4YzhlMmMtMjQwMi00NDJkLWFiN2QtNDUxZmZhMWEwNWI1In0.wikxKYYw-_nPCZvjInd0KIQ_5puu2tckrh_vnRtcZBs");
+      this.getUserProfile("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDkwNDY5NjIsImlhdCI6MTY0OTAzNjE2MiwidXNlcklEIjoiOTA4YzhlMmMtMjQwMi00NDJkLWFiN2QtNDUxZmZhMWEwNWI1In0.pzKmBjAH_LPRT79IReoiJxkAmpkSPQcIyx3LQ8L37ng");
     },
   },
   created() {
