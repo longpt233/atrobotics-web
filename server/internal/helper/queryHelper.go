@@ -8,13 +8,36 @@ import (
 )
 
 // lấy các trường ra để validate query
-func getFields(model interface{}) []string {
-	var field []string
-	v := reflect.ValueOf(model)
-	for i := 0; i < v.Type().NumField(); i++ {
-		field = append(field, v.Type().Field(i).Tag.Get("json"))
-	}
-	return field
+func getFields(i interface{}) []string {
+    typ := reflect.TypeOf(i)
+    attrs := make(map[string]bool)
+
+    if typ.Kind() != reflect.Struct {
+        fmt.Printf("%v type can't have attributes inspected\n", typ.Kind())
+        return nil
+    }
+    // loop through the struct's fields and set the map
+    for i := 0; i < typ.NumField(); i++ {
+        p := typ.Field(i)
+
+        if(p.Type.Kind() == reflect.Struct){
+            for j := 0 ; j < p.Type.NumField() ; j++{
+                p1 := p.Type.Field(j)
+                v1 := reflect.ValueOf(p.Type).Elem()
+                attrs[p1.Name] = v1.CanSet()
+            }
+        }
+        if !p.Anonymous {
+            v := reflect.ValueOf(p.Type)
+            v = v.Elem()
+            attrs[p.Name] = v.CanSet()
+        }
+    }
+    var rs []string
+    for key := range attrs{
+        rs = append(rs, key)
+    }
+    return rs
 }
 
 // check xem query có trogn các trường
@@ -37,6 +60,7 @@ func ValidateAndReturnSortQuery(model interface{}, sortBy string) (string, error
 	if order != "desc" && order != "asc" {
 		return "", errors.New("malformed orderdirection in sortBy query parameter, should be asc or desc")
 	}
+	fmt.Println(getFields(model))
 	if !stringInSlice(getFields(model), field) {
 		return "", errors.New("unknown field in sortBy query parameter")
 	}
@@ -51,7 +75,7 @@ func ValidateAndReturnFilterMap(model interface{}, filter string) (map[string]in
 	}
 	field, value := splits[0], splits[1]
 	if !stringInSlice(getFields(model), field) {
-		return nil, errors.New("unknown field in filter query parameter")
+		return nil, errors.New("unknown field in filter query parameter, only support: " + fmt.Sprint(getFields(model)))
 	}
 	return map[string]interface{}{field: value}, nil
 }
