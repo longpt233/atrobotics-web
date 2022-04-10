@@ -42,6 +42,6 @@ func SingleFile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, helper.BuildResponse(1, "get file done", "http://atroboticsvn.com/static/images/"+nameFile+"."+ext))
+	c.JSON(http.StatusOK, helper.BuildResponse(1, "get file done", "https://atroboticsvn.com/static/images/"+nameFile+"."+ext))
 
 }

@@ -1,18 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import AdminPage from '@/pages/dashboard/AdminPage';
 
-import MainLayout from '@/layouts/MainLayout.vue';
-import HomePage from "@/pages/home/HomePage.vue"
 const routes = [
   {
     path: '/',
-    component: MainLayout,
-    children: [
-      {
-        path: '',
-        name: 'HomePage',
-        component: HomePage,
-      },
-    ],
+    name: 'Admin',
+    component: AdminPage,
     meta: {
       title: 'AT Robotics',
     },

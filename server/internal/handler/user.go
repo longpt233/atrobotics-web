@@ -43,6 +43,11 @@ func (h *userHandler) AddUser(ctx *gin.Context) {
 		return
 	}
 
+	_, err := h.repo.GetUserByEmail(registerUser.Email)
+	if err == nil{
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Email has already existed",""))
+		return;
+	}
 	userRole, err := repository.NewRoleRepository().GetRoleByName("USER")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "error when find USER role", err.Error()))

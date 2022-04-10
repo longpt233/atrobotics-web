@@ -1,39 +1,31 @@
 <template>
   <div class="container">
-    <div class="d-flex justify-centent-between">
+    <div class="d-flex justify-content-between">
       <div class="d-flex align-items-center">
-        <img src="@/assets/images/logo-nobg.jpg" class="me-5" />
-        <div class="me-4 button button-home">Home</div>
-        <div class="me-4 button button-pages">Pages</div>
-        <div class="me-4 button button-products">Products</div>
-        <div class="me-4 button button-blog">Blog</div>
-        <div class="me-4 button button-shop">Shop</div>
+        <img class="button me-5" src="@/assets/images/logo-nobg.jpg" />
+        <div class="me-4 button button-home">Trang chủ</div>
+        <div class="me-4 button button-products">Sản phẩm</div>
+        <div class="me-4 button button-blog">Fanpage</div>
       </div>
 
       <div class="d-flex align-items-center">
-        <div class="mt-4">
-          <el-input v-model="input3" placeholder="Please input" class="input-with-select">
-            <template #prepend>
-              <el-select v-model="select" placeholder="Select" style="width: 110px">
-                <el-option label="Restaurant" value="1" />
-                <el-option label="Order No." value="2" />
-                <el-option label="Tel" value="3" />
-              </el-select>
-            </template>
-            <template #append>
-              <el-button :icon="Search" />
-            </template>
-          </el-input>
-        </div>
+        <el-input v-model="input3" placeholder="Please input" class="input-with-select">
+          <template #append>
+            <el-button type="primary">
+              <el-icon> <IconSearch /> </el-icon>
+            </el-button>
+          </template>
+        </el-input>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { Search as IconSearch } from '@element-plus/icons-vue';
 export default {
-  components: {},
-}
+  components: { IconSearch },
+};
 </script>
 
 <style lang="scss" scoped>
