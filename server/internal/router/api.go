@@ -14,16 +14,13 @@ import (
 func RunAPI(address string) error {
 
 	r := gin.Default()
+
+	// cors config 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
-
 	r.Use(cors.New(config))
 
-	// config := cors.DefaultConfig()
-	// config.AllowAllOrigins = true
-
-	// r.Use(cors.New(config))
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
@@ -63,7 +60,6 @@ func RunAPI(address string) error {
 		userAuth.GET("/info", userHandler.GetUser)
 		userAuth.PUT("/info", userHandler.UpdateUser)
 		userAuth.POST("/change-password", userHandler.ChangePassword)
-
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
 
@@ -76,7 +72,6 @@ func RunAPI(address string) error {
 
 		// authorize api
 		adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
-		// adminAuth := adminRouter.Group("/auth")
 
 		// category
 		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)

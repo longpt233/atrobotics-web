@@ -16,6 +16,7 @@ func getFields(i interface{}) []string {
         fmt.Printf("%v type can't have attributes inspected\n", typ.Kind())
         return nil
     }
+	
     // loop through the struct's fields and set the map
     for i := 0; i < typ.NumField(); i++ {
         p := typ.Field(i)
