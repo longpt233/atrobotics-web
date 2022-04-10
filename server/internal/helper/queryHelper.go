@@ -9,40 +9,49 @@ import (
 
 // lấy các trường ra để validate query
 func getFields(i interface{}) []string {
-    typ := reflect.TypeOf(i)
+    typOfInterface := reflect.TypeOf(i)
     attrs := make(map[string]bool)
 
-    if typ.Kind() != reflect.Struct {
-        fmt.Printf("%v type can't have attributes inspected\n", typ.Kind())
+	// fmt.Print(typOfInterface)
+
+    if typOfInterface.Kind() != reflect.Struct {
+        fmt.Printf("%v type can't have attributes inspected\n", typOfInterface.Kind())
         return nil
     }
+
+	var rs []string
 	
     // loop through the struct's fields and set the map
-    for i := 0; i < typ.NumField(); i++ {
-        p := typ.Field(i)
+    for i := 0; i < typOfInterface.NumField(); i++ {
+        fieldOfInterface := typOfInterface.Field(i)
 
-        if(p.Type.Kind() == reflect.Struct){
-            for j := 0 ; j < p.Type.NumField() ; j++{
-                p1 := p.Type.Field(j)
-                v1 := reflect.ValueOf(p.Type).Elem()
+        if(fieldOfInterface.Type.Kind() == reflect.Struct){
+
+			// loop field of feild 
+            for j := 0 ; j < fieldOfInterface.Type.NumField() ; j++{
+                p1 := fieldOfInterface.Type.Field(j)
+                v1 := reflect.ValueOf(fieldOfInterface.Type).Elem()
                 attrs[p1.Name] = v1.CanSet()
+				rs = append(rs, p1.Tag.Get("json")) // FIXME: bị dư một sô thuocj tính mở rọng nhưng tạm thế đã
             }
         }
-        if !p.Anonymous {
-            v := reflect.ValueOf(p.Type)
+        if !fieldOfInterface.Anonymous {
+            v := reflect.ValueOf(fieldOfInterface.Type)
             v = v.Elem()
-            attrs[p.Name] = v.CanSet()
+            attrs[fieldOfInterface.Name] = v.CanSet()
+
+			rs = append(rs, fieldOfInterface.Tag.Get("json"))
         }
     }
-    var rs []string
-    for key := range attrs{
-        rs = append(rs, key)
-    }
+
     return rs
 }
 
 // check xem query có trogn các trường
 func stringInSlice(strSlice []string, s string) bool {
+
+	fmt.Println("check string:",s," in slice: ", strSlice)
+
 	for _, v := range strSlice {
 		if v == s {
 			return true
@@ -53,15 +62,17 @@ func stringInSlice(strSlice []string, s string) bool {
 
 // build câu query sort
 func ValidateAndReturnSortQuery(model interface{}, sortBy string) (string, error) {
+	
 	splits := strings.Split(sortBy, ".")
 	if len(splits) != 2 {
 		return "", errors.New("malformed sortBy query parameter, should be field.orderdirection")
 	}
+	
 	field, order := splits[0], splits[1]
 	if order != "desc" && order != "asc" {
 		return "", errors.New("malformed orderdirection in sortBy query parameter, should be asc or desc")
 	}
-	fmt.Println(getFields(model))
+	 
 	if !stringInSlice(getFields(model), field) {
 		return "", errors.New("unknown field in sortBy query parameter")
 	}
