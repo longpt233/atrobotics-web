@@ -6,12 +6,14 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+
 type ProductRepository interface {
 	AddProduct(model.Product) (model.Product, error)
 	GetProduct(string) (model.Product, error)
 	GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, query string) ([]model.Product, error)
 	UpdateProduct(model.Product) (model.Product, error)
 	DeleteProduct(string) (model.Product, error)
+	GetAllProductBrand() ([]model.Product, error)
 }
 
 type productRepository struct {
@@ -52,4 +54,9 @@ func (db *productRepository) DeleteProduct(id string) (model.Product, error) {
 
 func (db *productRepository) GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, query string) (products []model.Product, err error) {
 	return products, db.connection.Where(filter).Limit(limit).Offset(offset).Order(query).Find(&products).Error
+}
+
+func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
+	var listBrand []model.Product
+	return listBrand, db.connection.Raw("SELECT DISTINCT product_brand FROM products").Scan(&listBrand).Error
 }

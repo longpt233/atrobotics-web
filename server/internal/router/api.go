@@ -15,12 +15,11 @@ func RunAPI(address string) error {
 
 	r := gin.Default()
 
-	// cors config 
+	// cors config
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	r.Use(cors.New(config))
-
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome to Our Mini Ecommerce")
@@ -48,8 +47,9 @@ func RunAPI(address string) error {
 		// xem liên quan
 		userRoutes.GET("/products", productHandler.GetAllProduct)
 		userRoutes.GET("/products/:id", productHandler.GetProduct)
-		userRoutes.GET("/categories/", productCategoryHandler.GetAllProductCategories)
+		userRoutes.GET("/categories", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
+		userRoutes.GET("/all-brand", productHandler.GetAllProductBrand)
 
 		// get banner
 		userRoutes.GET("/banners/:id", bannerHandler.GetBanner)
@@ -74,12 +74,12 @@ func RunAPI(address string) error {
 		adminAuth := adminRouter.Group("/auth", middleware.AuthorizeJWT(), middleware.IsAdmin())
 
 		// category
-		adminAuth.POST("/categories/", productCategoryHandler.AddProductCategory)
+		adminAuth.POST("/categories", productCategoryHandler.AddProductCategory)
 		adminAuth.DELETE("/categories/:id", productCategoryHandler.DeleteProductCategory)
 		adminAuth.PUT("/categories/:id", productCategoryHandler.UpdateProductCategory)
 
 		// product
-		adminAuth.POST("/products/", productHandler.AddProduct)
+		adminAuth.POST("/products", productHandler.AddProduct)
 		adminAuth.DELETE("/products/:id", productHandler.DeleteProduct)
 		adminAuth.PUT("/products/:id", productHandler.UpdateProduct)
 
@@ -92,7 +92,7 @@ func RunAPI(address string) error {
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)
 
 		//add banner
-		adminAuth.POST("/banners/", bannerHandler.AddBanner)
+		adminAuth.POST("/banners", bannerHandler.AddBanner)
 		adminAuth.PUT("/banners/:id", bannerHandler.UpdateBanner)
 		adminAuth.DELETE("/banners/:id", bannerHandler.DeleteBanner)
 
