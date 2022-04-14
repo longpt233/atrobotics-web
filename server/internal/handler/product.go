@@ -21,6 +21,7 @@ type ProductHandler interface {
 	UpdateProduct(*gin.Context)
 	DeleteProduct(*gin.Context)
 	GetAllProductBrand(*gin.Context)
+	SearchByShortDescription(*gin.Context)
 }
 
 type productHandler struct {
@@ -175,10 +176,21 @@ func (h *productHandler) GetAllProductBrand(ctx *gin.Context){
 	listBrand, err := h.repo.GetAllProductBrand();
 	if(err != nil){
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when get all brand", err))
+		return
 	}
 	var brands []string
 	for i:= 0; i<len(listBrand) ; i++ {
 		brands = append(brands, listBrand[i].ProductBrand)
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"get list brand successfully", brands))
+}
+func (h *productHandler) SearchByShortDescription(ctx *gin.Context){
+	pattern := ctx.Query("q")
+
+	listProduct, err := h.repo.SearchByShortDescription(pattern)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when search", err))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"search successfully", listProduct))
 }

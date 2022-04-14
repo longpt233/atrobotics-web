@@ -50,6 +50,7 @@ func RunAPI(address string) error {
 		userRoutes.GET("/categories", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
 		userRoutes.GET("/all-brand", productHandler.GetAllProductBrand)
+		userRoutes.GET("/search",productHandler.SearchByShortDescription)
 
 		// get banner
 		userRoutes.GET("/banners/:id", bannerHandler.GetBanner)

@@ -14,6 +14,7 @@ type ProductRepository interface {
 	UpdateProduct(model.Product) (model.Product, error)
 	DeleteProduct(string) (model.Product, error)
 	GetAllProductBrand() ([]model.Product, error)
+	SearchByShortDescription(pattern string) ([]model.Product , error)
 }
 
 type productRepository struct {
@@ -59,4 +60,10 @@ func (db *productRepository) GetAllProductWithOptions(filter map[string]interfac
 func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
 	var listBrand []model.Product
 	return listBrand, db.connection.Raw("SELECT DISTINCT product_brand FROM products").Scan(&listBrand).Error
+}
+
+func (db *productRepository) SearchByShortDescription(pattern string)([]model.Product, error){
+	var listProduct []model.Product
+
+	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_short_desc LIKE '%"+pattern+"%'").Scan(&listProduct).Error
 }
