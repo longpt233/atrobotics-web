@@ -9,3 +9,7 @@ type Banner struct {
 	BannerUpdateAt  time.Time `json:"updateAt" gorm:"column:banner_update_at"`
 	BannerCreateAt  time.Time `json:"createAt" gorm:"column:banner_create_at"`
 }
+
+func (Banner) TableName() string {
+	return "banners"
+}

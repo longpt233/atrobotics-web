@@ -32,6 +32,7 @@ func RunAPI(address string) error {
 	userHandler := handler.NewUserHandler()
 	orderHandler := handler.NewOrderHandler()
 	bannerHandler := handler.NewBannerHandler()
+	cartItems := handler.NewCartItemsHandler()
 
 	// api cho user
 	userRoutes := apiRoutes.Group("/user")
@@ -63,6 +64,10 @@ func RunAPI(address string) error {
 		userAuth.POST("/change-password", userHandler.ChangePassword)
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
+		userAuth.GET("/cart/list", cartItems.GetCartItemsByUserId)
+		userAuth.POST("/cart/add", cartItems.AddCartItems)
+		userAuth.DELETE("/cart/:id", cartItems.DeleteCartItems)
+		userAuth.PUT("/cart/:id",cartItems.UpdateCartItems)
 
 	}
 
