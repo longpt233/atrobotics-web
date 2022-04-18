@@ -2,10 +2,10 @@ package request
 
 type OrderRequest struct {
 	ProductOrders []OrderObject `json:"orders"`
-	TypeOrder     int           `json:"order_type"`
+	TypeOrder     int           `json:"orderType"`
 }
 
 type OrderObject struct {
-	ProductId string `json:"product_id"`
+	ProductId string `json:"productId"`
 	Quantity  int    `json:"quantity"`
 }

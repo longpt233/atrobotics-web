@@ -2,14 +2,14 @@ package model
 
 //User -> model for users table
 type User struct {
-	UserID        string `json:"user_id" gorm:"primaryKey"`
-	UserRoleID    string `json:"user_role_id"`                                      // col name
-	UserEmail     string `json:"user_email" binding:"required,email" gorm:"unique"` //TODO:  binding ?
-	UserPassword  string `json:"user_password" binding:"required"`
-	UserFirstName string `json:"user_firstname"`
-	UserLastName  string `json:"user_lastname"`
-	UserPhone     string `json:"user_phone"`
-	UserAddress   string `json:"user_address"`
+	UserID        string `json:"id" gorm:"primaryKey" gorm:"column:user_id"`
+	UserRoleID    string `json:"roleId" gorm:"column:user_role_id"`                                      // col name
+	UserEmail     string `json:"email" binding:"required,email" gorm:"unique" gorm:"column:user_email"` //TODO:  binding ?
+	UserPassword  string `json:"password" binding:"required" gorm:"column:user_password"`
+	UserFirstName string `json:"firstName" gorm:"column:user_firstname"`
+	UserLastName  string `json:"lastName" gorm:"column:user_lastname"`
+	UserPhone     string `json:"phone" gorm:"column:user_phone"`
+	UserAddress   string `json:"address" gorm:"column:user_address"`
 }
 
 //TableName --> Table for Product Model

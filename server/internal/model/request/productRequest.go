@@ -9,8 +9,8 @@ import (
 
 type ProductRequest struct {
 	base.BaseProduct
-	ProductImages []string `json:"product_images"`
-	ProductColor  []string `json:"product_color"`
+	ProductImages []string `json:"productImages"`
+	ProductColor  []string `json:"productColor"`
 }
 
 func (p *ProductRequest) ProductRequestToProduct() (model.Product, error) {

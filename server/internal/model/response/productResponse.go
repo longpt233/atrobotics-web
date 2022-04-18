@@ -9,11 +9,11 @@ import (
 
 type ProductResponse struct {
 	base.BaseProduct
-	ProductID        string    `json:"product_id" gorm:"primaryKey"`
-	ProductImages    []string  `json:"product_images"`
-	ProductUpdatedAt time.Time `json:"product_updated_at"`
-	ProductColor     []string  `json:"product_color"`
-	ProductCreatedAt time.Time `json:"product_created_at"`
+	ProductID        string    `json:"id"`
+	ProductImages    []string  `json:"images"`
+	ProductUpdatedAt time.Time `json:"updateAt"`
+	ProductColor     []string  `json:"color"`
+	ProductCreatedAt time.Time `json:"createdAt"`
 }
 
 func (p *ProductResponse) ProductToProductResponse(product model.Product) (ProductResponse, error) {
