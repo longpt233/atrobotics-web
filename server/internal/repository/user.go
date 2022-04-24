@@ -11,6 +11,7 @@ type UserRepository interface {
 	GetUser(string) (model.User, error)
 	AddUser(user model.User) (model.User, error)
 	UpdateUser(user model.User) (model.User, error)
+	GetAllUser(string) ([]model.User, error)
 }
 
 type userRepository struct {
@@ -41,4 +42,8 @@ func (db *userRepository) UpdateUser(user model.User) (model.User, error){
 		return checkUser, err
 	}
 	return user, db.connection.Model(&user).Where(model.User{UserID: user.UserID}).Updates(&user).Error
+}
+
+func (db *userRepository) GetAllUser(roleId string) (listUser []model.User, err error){
+	return listUser, db.connection.Find(&listUser, "user_role_id=?",roleId).Error
 }

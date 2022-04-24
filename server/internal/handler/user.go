@@ -19,6 +19,7 @@ type UserHandler interface {
 	GetUser(*gin.Context)
 	UpdateUser(*gin.Context)
 	ChangePassword(*gin.Context)
+	GetAllUser(*gin.Context)
 }
 
 type userHandler struct {
@@ -179,6 +180,20 @@ func (h *userHandler) ChangePassword(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, helper.BuildResponse(-1, "Not Exist session", ""))
 	}
 }
+func (h *userHandler) GetAllUser(ctx *gin.Context){
+	userRole, err := repository.NewRoleRepository().GetRoleByName("USER")
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find USER role", err.Error()))
+		return
+	}
+	listUser, err := h.repo.GetAllUser(userRole.RoleID)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when get all users", err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list user successfully", listUser))
+}
+
 
 func hashPass(pass *string) {
 	bytePass := []byte(*pass)
