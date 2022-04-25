@@ -22,6 +22,7 @@ type ProductHandler interface {
 	DeleteProduct(*gin.Context)
 	GetAllProductBrand(*gin.Context)
 	SearchByShortDescription(*gin.Context)
+	GetProductByCategory(*gin.Context)
 }
 
 type productHandler struct {
@@ -193,4 +194,19 @@ func (h *productHandler) SearchByShortDescription(ctx *gin.Context){
 		return
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"search successfully", listProduct))
+}
+func (h *productHandler) GetProductByCategory(ctx *gin.Context){
+	categoryName := ctx.Query("categoryName")
+
+	category, err := repository.NewProductCategoryRepository().GetProductCategoryByName(categoryName)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "Category Name not exist", err))
+		return
+	}
+	listProduct, err := h.repo.GetProductByCategory(category.ProductCategoryID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when get product list by category id", err))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"get list product by category successfully", listProduct))
 }

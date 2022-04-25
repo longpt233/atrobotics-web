@@ -15,6 +15,7 @@ type ProductRepository interface {
 	DeleteProduct(string) (model.Product, error)
 	GetAllProductBrand() ([]model.Product, error)
 	SearchByShortDescription(pattern string) ([]model.Product , error)
+	GetProductByCategory(string) ([]model.Product, error)
 }
 
 type productRepository struct {
@@ -66,4 +67,7 @@ func (db *productRepository) SearchByShortDescription(pattern string)([]model.Pr
 	var listProduct []model.Product
 
 	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_short_desc LIKE '%"+pattern+"%'").Scan(&listProduct).Error
+}
+func (db *productRepository) GetProductByCategory(categoryId string) (listProduct []model.Product, err error){
+	return listProduct, db.connection.Find(&listProduct, "product_category_id=?", categoryId).Limit(4).Error
 }

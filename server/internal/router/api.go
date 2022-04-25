@@ -44,10 +44,12 @@ func RunAPI(address string) error {
 		userRoutes.POST("/login", userHandler.SignInUser)
 		userRoutes.POST("/register", userHandler.AddUser)
 		userRoutes.POST("/logout", nil)
+		userRoutes.GET("/forgot-password",userHandler.ForgotPassword)
 
 		// xem liên quan
 		userRoutes.GET("/products", productHandler.GetAllProduct)
 		userRoutes.GET("/products/:id", productHandler.GetProduct)
+		userRoutes.GET("/products/by-category", productHandler.GetProductByCategory)
 		userRoutes.GET("/categories", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
 		userRoutes.GET("/all-brand", productHandler.GetAllProductBrand)

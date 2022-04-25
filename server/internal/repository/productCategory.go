@@ -12,6 +12,7 @@ type ProductCategoryRepository interface {
 	GetAllProductCategories() ([]model.ProductCategory, error)
 	DeleteProductCategory(string) (model.ProductCategory, error)
 	UpdateProductCategory(model.ProductCategory) (model.ProductCategory, error)
+	GetProductCategoryByName(string) (model.ProductCategory, error)
 }
 
 type productCategoryRepository struct {
@@ -45,4 +46,7 @@ func (db *productCategoryRepository) UpdateProductCategory(category model.Produc
 		return checkCategory, err
 	}
 	return category, db.connection.Model(&category).Where(model.ProductCategory{ProductCategoryID: category.ProductCategoryID}).Updates(&category).Error
+}
+func (db *productCategoryRepository) GetProductCategoryByName(categoryName string) (category model.ProductCategory, err error){
+	return category, db.connection.First(&category,"category_name=?",categoryName).Error
 }

@@ -20,6 +20,7 @@ type UserHandler interface {
 	UpdateUser(*gin.Context)
 	ChangePassword(*gin.Context)
 	GetAllUser(*gin.Context)
+	ForgotPassword(*gin.Context)
 }
 
 type userHandler struct {
@@ -192,6 +193,39 @@ func (h *userHandler) GetAllUser(ctx *gin.Context){
 		return
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list user successfully", listUser))
+}
+func (h *userHandler) ForgotPassword(ctx *gin.Context){
+	userEmail := ctx.Query("email")
+	checkUser, err := h.repo.GetUserByEmail(userEmail)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, helper.BuildResponse(-1, "Email is not exist", err.Error()))
+		return
+	}
+	//if user is exist => generate new password
+	newPassword := helper.GenerateNewPassword()
+	
+
+	//send email
+	var to []string
+	to = append(to, userEmail)
+	sendErr := helper.SendEmailForgotPassword(to, newPassword) 
+
+	if sendErr != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when send email reset password", sendErr.Error()))
+		return
+	}
+
+	//update user
+	checkUser.UserPassword = newPassword
+	hashPass(&checkUser.UserPassword)
+	updateUser, err := h.repo.UpdateUser(checkUser)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when update user password", err.Error()))
+		return
+	}
+	updateUser.UserPassword = ""
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "send email reset password success", updateUser))
+	
 }
 
 
