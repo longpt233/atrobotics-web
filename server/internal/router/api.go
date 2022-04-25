@@ -33,6 +33,7 @@ func RunAPI(address string) error {
 	orderHandler := handler.NewOrderHandler()
 	bannerHandler := handler.NewBannerHandler()
 	cartItems := handler.NewCartItemsHandler()
+	deliveryAddressHandler := handler.NewDeliveryAddressHandler()
 
 	// api cho user
 	userRoutes := apiRoutes.Group("/user")
@@ -70,6 +71,11 @@ func RunAPI(address string) error {
 		userAuth.POST("/cart/add", cartItems.AddCartItems)
 		userAuth.DELETE("/cart/:id", cartItems.DeleteCartItems)
 		userAuth.PUT("/cart/:id",cartItems.UpdateCartItems)
+		//delivery address API
+		userAuth.POST("/delivery-address",deliveryAddressHandler.AddDeliveryAddress)
+		userAuth.GET("/delivery-address",deliveryAddressHandler.GetDeliveryAddressByUser)
+		userAuth.PUT("/delivery-address/:id", deliveryAddressHandler.UpdateDeliveryAddress)
+		userAuth.DELETE("/delivery-address/:id",deliveryAddressHandler.DeleteDeliveryAddress)
 
 	}
 
