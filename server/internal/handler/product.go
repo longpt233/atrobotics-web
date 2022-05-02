@@ -196,11 +196,11 @@ func (h *productHandler) SearchByShortDescription(ctx *gin.Context){
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"search successfully", listProduct))
 }
 func (h *productHandler) GetProductByCategory(ctx *gin.Context){
-	categoryName := ctx.Query("categoryName")
+	categoryId := ctx.Query("categoryId")
 
-	category, err := repository.NewProductCategoryRepository().GetProductCategoryByName(categoryName)
+	category, err := repository.NewProductCategoryRepository().GetProductCategory(categoryId)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "Category Name not exist", err))
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "Category Id not exist", err))
 		return
 	}
 	listProduct, err := h.repo.GetProductByCategory(category.ProductCategoryID)
