@@ -168,8 +168,20 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 		}
 		rsProducts = append(rsProducts, p)
 	}
+		
 
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsProducts))
+	countAll, err := h.repo.CountProduct()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "cant not count all ?? ", err.Error()))
+		return
+	}
+	
+	returnData := map[string]interface{}{
+		"data" : rsProducts,
+		"total" : countAll,
+	}
+
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", returnData))
 
 }
 

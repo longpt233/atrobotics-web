@@ -10,6 +10,7 @@ import (
 type ProductRepository interface {
 	AddProduct(model.Product) (model.Product, error)
 	GetProduct(string) (model.Product, error)
+	CountProduct() (int , error)
 	GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, query string) ([]model.Product, error)
 	UpdateProduct(model.Product) (model.Product, error)
 	DeleteProduct(string) (model.Product, error)
@@ -52,6 +53,11 @@ func (db *productRepository) DeleteProduct(id string) (model.Product, error) {
 		return product, err
 	}
 	return product, db.connection.Delete(&product, "product_id=?", product.ProductID).Error
+}
+
+func (db *productRepository) CountProduct() (count int , err error){
+	product := model.Product{}
+	return count, db.connection.Model(&product).Count(&count).Error
 }
 
 func (db *productRepository) GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, query string) (products []model.Product, err error) {
