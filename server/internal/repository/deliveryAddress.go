@@ -11,7 +11,7 @@ type DeliveryAddressRepository interface {
 	GetDeliveryAddressByUser(string) ([]model.DeliveryAddress, error)
 	DeleteDeliveryAddress(string) (model.DeliveryAddress, error)
 	UpdateDeliveryAddress(model.DeliveryAddress) (model.DeliveryAddress, error)
-
+	GetDeliveryAddressById(string) (model.DeliveryAddress, error)
 }
 
 type deliveryAddressRepository struct {
@@ -45,4 +45,7 @@ func (db *deliveryAddressRepository) UpdateDeliveryAddress(modifyAddress model.D
 	}
 	modifyAddress.CreatedAt = checkAddress.CreatedAt
 	return modifyAddress, db.connection.Model(&modifyAddress).Where(model.DeliveryAddress{DeliveryAddressId: modifyAddress.DeliveryAddressId}).Updates(&modifyAddress).Error
+}
+func (db *deliveryAddressRepository) GetDeliveryAddressById(id string) (address model.DeliveryAddress, err error){
+	return address, db.connection.First(&address, "delivery_address_id=?",id).Error
 }

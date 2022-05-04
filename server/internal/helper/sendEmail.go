@@ -15,7 +15,7 @@ var (
 	smtpPort = "587"
 )
 
-func SendEmailForgotPassword(to []string, newPassword string) (error) {
+func SendEmailForgotPassword(to []string, otpValue string) (error) {
 	from := os.Getenv("EMAIL_ACCOUNT")
 	auth := smtp.PlainAuth("", from, os.Getenv("EMAIL_PASSWORD"), smtpHost)
 
@@ -27,18 +27,16 @@ func SendEmailForgotPassword(to []string, newPassword string) (error) {
 
 	var body bytes.Buffer
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	_ , err = body.Write([]byte(fmt.Sprintf("Subject: Mail thông báo Mật khẩu mới của tài khoản "+to[0]+"\n%s\n\n", mimeHeaders)))
+	_ , err = body.Write([]byte(fmt.Sprint("Subject:  AT Robotics - Thông báo xác nhận quên mật khẩu", mimeHeaders)))
 
 	if err != nil {
 		return err
 	}
 	//email body
 	bodyErr := tpl.Execute(&body, struct {
-		BodyHeader string
 		Content string
 	}{
-		BodyHeader: "Mật khẩu mới của bạn là:  ",
-		Content: newPassword,
+		Content: otpValue,
 	})
 	if bodyErr != nil {
 		return bodyErr
