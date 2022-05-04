@@ -21,7 +21,7 @@ type OrderHandler interface {
 	OrderProduct(*gin.Context)
 	GetOrderProduct(*gin.Context)
 	GetAllOrderProduct(*gin.Context)
-	UpdateOrderProduct(*gin.Context)
+	UpdateOrderStatus(*gin.Context)
 }
 
 type orderHandler struct {
@@ -38,36 +38,79 @@ func NewOrderHandler() OrderHandler {
 }
 
 func (h *orderHandler) OrderProduct(ctx *gin.Context) { // TODO: transaction?
-	// lấy thông tin order từ request
-	var orderForm request.OrderRequest
-	if err := ctx.ShouldBindJSON(&orderForm); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid input", err.Error()))
+	userId, isExist := ctx.Get("userID")
+	if !isExist {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "unauthorized", "Invalid token"))
 		return
 	}
-
-	// lây thông tin user đã được set từ middleware
-	id, _ := ctx.Get("userID")
-	if id == nil {
-		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "lấy id user bị lỗ rồi khóc đi ", ""))
-		return
-	}
-
-	// chuyển đổi từ đơn về một ban ghi để lưu db
-	order, err := h.OrderRequestToOrder(&orderForm, fmt.Sprint(id)) // parse asset id to int syntax
+	addressId := ctx.Query("addressId")
+	address, err := repository.NewDeliveryAddressRepository().GetDeliveryAddressById(addressId)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "không thể  tạo đơn", err.Error()))
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when get address", err))
 		return
 	}
-
-	// lưu vô db
-	order.OrderId = uuid.NewString()
-	rsOrder, err := h.repo.OrderProduct(order)
+	orderAddress := address.DetailAddress + ", " + address.Ward + ", " + address.District + ", " + address.City
+	listCartItems, err := repository.NewCartItemsRepository().GetCartItemsByUserId(fmt.Sprint(userId))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when add product (có thể là id bị sai)", err.Error()))
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when get list cart items", err))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "create order successfully!", rsOrder))
 
+	var orderDetails []model.OrderProduct
+	for _, cItems := range listCartItems {
+		product, err := h.repoProduct.GetProduct(cItems.CartProductId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "product is not exist", err))
+			return
+		}
+		orderProduct := model.OrderProduct{
+			ProductId:        product.ProductID,
+			ProductName:      product.ProductName,
+			ProductImage:     product.ProductImages,
+			CurrentPrice:     product.ProductPrice,
+			Quantity:         cItems.CartQuantity,
+			ShortDescription: product.ProductShortDesc,
+			Colors:           product.ProductColor,
+		}
+
+		orderDetails = append(orderDetails, orderProduct)
+	}
+	orderDetailsStr, err := json.Marshal(orderDetails)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when parse to json", err))
+		return
+	}
+	order := model.Order{
+		OrderId:        uuid.NewString(),
+		OrderItems:     string(orderDetailsStr),
+		OrderCreatedAt: time.Now(),
+		OrderStatus:    1,
+		OrderCode:      helper.GenerateOrderCode(),
+		OrderAddress:   orderAddress,
+		UserId:         fmt.Sprint(userId),
+	}
+	createOrder, err := h.repo.OrderProduct(order)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when add order", err))
+		return
+	}
+	for _, cItems := range listCartItems {
+		_, err := repository.NewCartItemsRepository().DeleteCartItems(cItems.CartId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when clear cart", err))
+			return
+		}
+	}
+	orderResponse := response.OrderResponse{
+		OrderId: createOrder.OrderId,
+		OrderItems: orderDetails,
+		OrderCreatedAt: createOrder.OrderCreatedAt,
+		OrderStatus: createOrder.OrderStatus,
+		OrderCode: createOrder.OrderCode,
+		OrderAddress: createOrder.OrderAddress,
+		UserId: createOrder.UserId,
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "order product successfully!", orderResponse))
 }
 
 func (h *orderHandler) GetOrderProduct(ctx *gin.Context) {
@@ -78,7 +121,12 @@ func (h *orderHandler) GetOrderProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get product successfully!", order))
+	orderResponse, err := orderToOrderResponse(order)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when parse json to list order product", err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get product successfully!", orderResponse))
 
 }
 
@@ -136,15 +184,28 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 		return
 	}
 
-	// trả về thành công
-	res := response.OrderResponse{
-		Orders:       rsOrders,
-		OrdersLength: len(rsOrders),
-	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", res))
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsOrders))
 }
 
-func (h *orderHandler) UpdateOrderProduct(ctx *gin.Context) {
+func (h *orderHandler) UpdateOrderStatus(ctx *gin.Context) {
+	orderId := ctx.Query("orderId")
+	status := ctx.Query("status")
+	intStatus, err := strconv.Atoi(status)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Invalid status params", err.Error()))
+		return
+	}
+	order, err := h.repo.UpdateOrderStatus(orderId, intStatus)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Error when update order status", err.Error()))
+		return
+	}
+	orderResponse, err := orderToOrderResponse(order)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when parse json to list order product", err.Error()))
+		return
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "update order status success fully!", orderResponse))
 
 }
 
@@ -171,10 +232,27 @@ func (h *orderHandler) OrderRequestToOrder(orderForm *request.OrderRequest, user
 
 	order := model.Order{
 		UserId:         userId,
-		OrderDetail:    string(productOrdersInfo),
-		OrderPrice:     float32(total),
+		OrderItems:     string(productOrdersInfo),
+		OrderCode:      "",
 		OrderCreatedAt: time.Now(),
 		OrderStatus:    orderForm.TypeOrder,
 	}
 	return order, nil
+}
+func orderToOrderResponse(order model.Order) (response.OrderResponse, error) {
+	var orderItems []model.OrderProduct
+	err := json.Unmarshal([]byte(order.OrderItems), &orderItems)
+	if err != nil {
+		return response.OrderResponse{}, err
+	}
+	orderResponse := response.OrderResponse{
+		OrderId: order.OrderId,
+		OrderItems: orderItems,
+		OrderCreatedAt: order.OrderCreatedAt,
+		OrderStatus: order.OrderStatus,
+		OrderCode: order.OrderCode,
+		OrderAddress: order.OrderAddress,
+		UserId: order.UserId,
+	}
+	return orderResponse, nil
 }

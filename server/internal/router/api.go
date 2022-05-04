@@ -46,6 +46,7 @@ func RunAPI(address string) error {
 		userRoutes.POST("/register", userHandler.AddUser)
 		userRoutes.POST("/logout", nil)
 		userRoutes.GET("/forgot-password",userHandler.ForgotPassword)
+		userRoutes.POST("/verify-otp", userHandler.VerifyOtp)
 
 		// xem liên quan
 		userRoutes.GET("/products", productHandler.GetAllProduct)
@@ -67,6 +68,7 @@ func RunAPI(address string) error {
 		userAuth.POST("/change-password", userHandler.ChangePassword)
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
+		userAuth.POST("/orders/update-status", orderHandler.UpdateOrderStatus)
 		userAuth.GET("/cart/list", cartItems.GetCartItemsByUserId)
 		userAuth.POST("/cart/add", cartItems.AddCartItems)
 		userAuth.DELETE("/cart/:id", cartItems.DeleteCartItems)
@@ -102,7 +104,8 @@ func RunAPI(address string) error {
 		// order info. không cho del, k cho tạo
 		adminAuth.GET("/orders", orderHandler.GetAllOrderProduct)
 		adminAuth.GET("/orders/:id", orderHandler.GetOrderProduct)
-		adminAuth.PUT("/orders/:id", orderHandler.UpdateOrderProduct)
+		adminAuth.PUT("/orders/:id", orderHandler.UpdateOrderStatus)
+		adminAuth.POST("/orders/update-status", orderHandler.UpdateOrderStatus)
 
 		// upload file
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)

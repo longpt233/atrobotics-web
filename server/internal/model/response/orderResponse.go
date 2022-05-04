@@ -1,8 +1,15 @@
 package response
 
-import "atro/internal/model"
+import (
+	"time"
+)
 
 type OrderResponse struct {
-	Orders       []model.Order `json:"orders"`
-	OrdersLength int           `json:"size"`
+	OrderId        string      `json:"id" `
+	UserId         string      `json:"userId"`
+	OrderItems     interface{} `json:"details"`
+	OrderCreatedAt time.Time   `json:"createdAt"`
+	OrderStatus    int         `json:"status"` // status : 1: created, 2: accepted, 3:done, 4: paid?
+	OrderCode      string      `json:"orderCode"`
+	OrderAddress   string      `json:"orderAddress"`
 }

@@ -7,6 +7,7 @@ import (
 	"atro/internal/repository"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -21,6 +22,7 @@ type UserHandler interface {
 	ChangePassword(*gin.Context)
 	GetAllUser(*gin.Context)
 	ForgotPassword(*gin.Context)
+	VerifyOtp(*gin.Context)
 }
 
 type userHandler struct {
@@ -46,9 +48,9 @@ func (h *userHandler) AddUser(ctx *gin.Context) {
 	}
 
 	_, err := h.repo.GetUserByEmail(registerUser.Email)
-	if err == nil{
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Email has already existed",""))
-		return;
+	if err == nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Email has already existed", ""))
+		return
 	}
 	userRole, err := repository.NewRoleRepository().GetRoleByName("USER")
 	if err != nil {
@@ -181,7 +183,7 @@ func (h *userHandler) ChangePassword(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, helper.BuildResponse(-1, "Not Exist session", ""))
 	}
 }
-func (h *userHandler) GetAllUser(ctx *gin.Context){
+func (h *userHandler) GetAllUser(ctx *gin.Context) {
 	userRole, err := repository.NewRoleRepository().GetRoleByName("USER")
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find USER role", err.Error()))
@@ -194,40 +196,84 @@ func (h *userHandler) GetAllUser(ctx *gin.Context){
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list user successfully", listUser))
 }
-func (h *userHandler) ForgotPassword(ctx *gin.Context){
+func (h *userHandler) ForgotPassword(ctx *gin.Context) {
 	userEmail := ctx.Query("email")
-	checkUser, err := h.repo.GetUserByEmail(userEmail)
+	user, err := h.repo.GetUserByEmail(userEmail)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, helper.BuildResponse(-1, "Email is not exist", err.Error()))
 		return
 	}
-	//if user is exist => generate new password
-	newPassword := helper.GenerateNewPassword()
-	
+	//if user is exist => generate new Otp
+	otpValue := helper.GenerateOtp()
 
 	//send email
 	var to []string
 	to = append(to, userEmail)
-	sendErr := helper.SendEmailForgotPassword(to, newPassword) 
+	sendErr := helper.SendEmailForgotPassword(to, otpValue)
 
 	if sendErr != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when send email reset password", sendErr.Error()))
 		return
 	}
 
-	//update user
-	checkUser.UserPassword = newPassword
-	hashPass(&checkUser.UserPassword)
-	updateUser, err := h.repo.UpdateUser(checkUser)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when update user password", err.Error()))
+	newOtp := model.Otp{
+		OtpId:        uuid.NewString(),
+		UserId: user.UserID,
+		OtpCreateAt:  time.Now(),
+		OtpUpdateAt:  time.Now(),
+		OtpUsedOk:    0,
+		OtpValue:     otpValue,
+		OtpTimeStart: time.Now(),
+		OtpTimeEnd:   time.Now().Add(120e9),
+	}
+	_, otpErr := repository.NewOtpRepository().AddOtp(newOtp)
+	if otpErr != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when create otp", otpErr.Error()))
 		return
 	}
-	updateUser.UserPassword = ""
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "send email reset password success", updateUser))
-	
+
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "send email verify otp success", user.UserID))
+
 }
 
+func (h *userHandler) VerifyOtp(ctx *gin.Context) {
+	var otpRequest request.VerifyOtpRequest
+	if err := ctx.ShouldBindJSON(&otpRequest); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Invalid Params", err.Error()))
+		return
+	}
+	_ , err := h.repo.GetUser(otpRequest.UserId)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "User is not existed", err.Error()))
+		return
+	}
+	otp, err := repository.NewOtpRepository().GetOtpByUserId(otpRequest.UserId)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find otp", err.Error()))
+		return
+	}
+	if otp.OtpValue == otpRequest.OtpValue {
+		if time.Now().Before(otp.OtpTimeEnd) {
+			otp.OtpUsedOk = 1
+			otp.OtpUpdateAt = time.Now()
+			_, err = repository.NewOtpRepository().UpdateOtpStatus(otp)
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when verify otp", err.Error()))
+				return
+			}
+			ctx.JSON(http.StatusOK, helper.BuildResponse(1, "verify otp success", ""))
+			return
+		}else {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Otp is expired", err.Error()))
+			return
+		}
+
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Invalid otp value", err.Error()))
+		return
+	}
+
+}
 
 func hashPass(pass *string) {
 	bytePass := []byte(*pass)
