@@ -205,7 +205,17 @@ func (h *productHandler) SearchByShortDescription(ctx *gin.Context){
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when search", err))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"search successfully", listProduct))
+	var rsProducts []response.ProductResponse
+	for i := 0; i < len(listProduct); i++ {
+		var p response.ProductResponse
+		p, err := p.ProductToProductResponse(listProduct[i])
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to array", err.Error()))
+			return
+		}
+		rsProducts = append(rsProducts, p)
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"search successfully", rsProducts))
 }
 func (h *productHandler) GetProductByCategory(ctx *gin.Context){
 	categoryId := ctx.Query("categoryId")
@@ -220,5 +230,15 @@ func (h *productHandler) GetProductByCategory(ctx *gin.Context){
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when get product list by category id", err))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"get list product by category successfully", listProduct))
+	var rsProducts []response.ProductResponse
+	for i := 0; i < len(listProduct); i++ {
+		var p response.ProductResponse
+		p, err := p.ProductToProductResponse(listProduct[i])
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to array", err.Error()))
+			return
+		}
+		rsProducts = append(rsProducts, p)
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"get list product by category successfully", rsProducts))
 }
