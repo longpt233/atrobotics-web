@@ -9,10 +9,7 @@ type CardItems struct {
 	CartQuantity  int       `json:"quantity" gorm:"column:cart_quantity"`
 	CartCreatedAt time.Time `json:"createdAt" gorm:"column:cart_created_at"`
 	CartUpdatedAt time.Time `json:"updateAt" gorm:"column:cart_updated_at"`
-	CartState     int       `json:"state" gorm:"column:cart_state"` 
-	//State:  0: in cart, 1: wait for confirm
-			// 2: Delivering, 3: Delivered 
-			// 4: Cancelled
+	CartColor     string       `json:"color" gorm:"column:cart_color"` 
 }
 
 func (CardItems) TableName() string {

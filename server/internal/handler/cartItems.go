@@ -49,7 +49,7 @@ func (h *cartItemsHandler) AddCartItems(ctx *gin.Context) {
 	}
 	checkExistCart, err := repository.NewCartItemsRepository().GetCartItemsByUserIdAndProductId(strUserId, newCartItems.CartProductId)
 	var rsCartItems model.CardItems
-	if err != nil {
+	if err != nil{
 		rsCartItems = model.CardItems{
 			CartId:        uuid.NewString(),
 			CartUserId:    strUserId,
@@ -57,7 +57,7 @@ func (h *cartItemsHandler) AddCartItems(ctx *gin.Context) {
 			CartQuantity:  newCartItems.CartQuantity,
 			CartCreatedAt: time.Now(),
 			CartUpdatedAt: time.Now(),
-			CartState:     0, //init state is in cart
+			CartColor:     newCartItems.CartColor, //init state is in cart
 		}
 		cartItems, err := h.repo.AddCartItems(rsCartItems)
 		if err != nil {
@@ -66,21 +66,40 @@ func (h *cartItemsHandler) AddCartItems(ctx *gin.Context) {
 		}
 		ctx.JSON(http.StatusOK, helper.BuildResponse(1, "add cart items successfully!", cartItems))
 	} else {
-		rsCartItems = model.CardItems{
-			CartId:        checkExistCart.CartId,
-			CartUserId:    strUserId,
-			CartProductId: newCartItems.CartProductId,
-			CartQuantity:  newCartItems.CartQuantity + checkExistCart.CartQuantity,
-			CartCreatedAt: checkExistCart.CartCreatedAt,
-			CartUpdatedAt: time.Now(),
-			CartState:     0, //init state is in cart
+		var cartItems model.CardItems
+		if checkExistCart.CartColor != newCartItems.CartColor {
+			rsCartItems = model.CardItems{
+				CartId:        uuid.NewString(),
+				CartUserId:    strUserId,
+				CartProductId: newCartItems.CartProductId,
+				CartQuantity:  newCartItems.CartQuantity,
+				CartCreatedAt: time.Now(),
+				CartUpdatedAt: time.Now(),
+				CartColor:     newCartItems.CartColor, //init state is in cart
+			}
+			cartItems, err := h.repo.AddCartItems(rsCartItems)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when add cart items", err.Error()))
+				return
+			}
+			ctx.JSON(http.StatusOK, helper.BuildResponse(1, "add cart items successfully!", cartItems))
+		}else {
+			rsCartItems = model.CardItems{
+				CartId:        checkExistCart.CartId,
+				CartUserId:    strUserId,
+				CartProductId: newCartItems.CartProductId,
+				CartQuantity:  newCartItems.CartQuantity + checkExistCart.CartQuantity,
+				CartCreatedAt: checkExistCart.CartCreatedAt,
+				CartUpdatedAt: time.Now(),
+				CartColor:     newCartItems.CartColor, //init state is in cart
+			}
+			cartItems, err = h.repo.UpdateCartItems(rsCartItems)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when update cart items", err.Error()))
+				return
+			}
+			ctx.JSON(http.StatusOK, helper.BuildResponse(1, "update cart items successfully!", cartItems))
 		}
-		cartItems, err := h.repo.UpdateCartItems(rsCartItems)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when update cart items", err.Error()))
-			return
-		}
-		ctx.JSON(http.StatusOK, helper.BuildResponse(1, "update cart items successfully!", cartItems))
 	}
 
 }
@@ -131,6 +150,7 @@ func (h *cartItemsHandler) UpdateCartItems(ctx *gin.Context) {
 		CartUserId:    fmt.Sprint(userId),
 		CartProductId: requestCart.CartProductId,
 		CartQuantity:  requestCart.CartQuantity,
+		CartColor:     requestCart.CartColor,
 		CartUpdatedAt: time.Now(),
 	}
 	rsCartItems, err := h.repo.UpdateCartItems(modifyCart)

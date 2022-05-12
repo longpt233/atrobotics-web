@@ -70,7 +70,7 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) { // TODO: transaction?
 			CurrentPrice:     product.ProductPrice,
 			Quantity:         cItems.CartQuantity,
 			ShortDescription: product.ProductShortDesc,
-			Colors:           product.ProductColor,
+			Colors:           cItems.CartColor,
 		}
 
 		orderDetails = append(orderDetails, orderProduct)
