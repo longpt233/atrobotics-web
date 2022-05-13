@@ -6,16 +6,15 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-
 type ProductRepository interface {
 	AddProduct(model.Product) (model.Product, error)
 	GetProduct(string) (model.Product, error)
-	CountProduct() (int , error)
-	GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, query string) ([]model.Product, error)
+	CountProduct() (int, error)
+	GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, query string, searchPattern string) ([]model.Product, error)
 	UpdateProduct(model.Product) (model.Product, error)
 	DeleteProduct(string) (model.Product, error)
 	GetAllProductBrand() ([]model.Product, error)
-	SearchByShortDescription(pattern string) ([]model.Product , error)
+	SearchByShortDescription(pattern string) ([]model.Product, error)
 	GetProductByCategory(string) ([]model.Product, error)
 }
 
@@ -55,13 +54,13 @@ func (db *productRepository) DeleteProduct(id string) (model.Product, error) {
 	return product, db.connection.Delete(&product, "product_id=?", product.ProductID).Error
 }
 
-func (db *productRepository) CountProduct() (count int , err error){
+func (db *productRepository) CountProduct() (count int, err error) {
 	product := model.Product{}
 	return count, db.connection.Model(&product).Count(&count).Error
 }
 
-func (db *productRepository) GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, query string) (products []model.Product, err error) {
-	return products, db.connection.Where(filter).Limit(limit).Offset(offset).Order(query).Find(&products).Error
+func (db *productRepository) GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, order string, searchPattern string) (products []model.Product, err error) {
+	return products, db.connection.Where(filter).Where("product_short_desc LIKE ?", "%"+searchPattern+"%").Limit(limit).Offset(offset).Order(order).Find(&products).Error
 }
 
 func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
@@ -69,11 +68,11 @@ func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
 	return listBrand, db.connection.Raw("SELECT DISTINCT product_brand FROM products").Scan(&listBrand).Error
 }
 
-func (db *productRepository) SearchByShortDescription(pattern string)([]model.Product, error){
+func (db *productRepository) SearchByShortDescription(pattern string) ([]model.Product, error) {
 	var listProduct []model.Product
 
-	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_short_desc LIKE '%"+pattern+"%'").Scan(&listProduct).Error
+	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_short_desc LIKE '%" + pattern + "%'").Scan(&listProduct).Error
 }
-func (db *productRepository) GetProductByCategory(categoryId string) (listProduct []model.Product, err error){
+func (db *productRepository) GetProductByCategory(categoryId string) (listProduct []model.Product, err error) {
 	return listProduct, db.connection.Find(&listProduct, "product_category_id=?", categoryId).Limit(4).Error
 }

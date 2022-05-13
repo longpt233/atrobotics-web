@@ -150,8 +150,11 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 		}
 	}
 
+	// tao query search
+	pattern := ctx.Query("q") // default ""
+
 	// gửi query
-	products, err := h.repo.GetAllProductWithOptions(filterMap, limit, offset, sortQuery)
+	products, err := h.repo.GetAllProductWithOptions(filterMap, limit, offset, sortQuery, pattern)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "not found !", err.Error()))
 		return
