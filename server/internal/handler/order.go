@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -109,45 +110,52 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) { // TODO: transaction?
 		}
 	}
 	orderResponse := response.OrderResponse{
-		OrderId: createOrder.OrderId,
-		OrderItems: orderDetails,
+		OrderId:        createOrder.OrderId,
+		OrderItems:     orderDetails,
 		OrderCreatedAt: createOrder.OrderCreatedAt,
-		OrderStatus: createOrder.OrderStatus,
-		OrderCode: createOrder.OrderCode,
-		OrderAddress: createOrder.OrderAddress,
-		UserId: createOrder.UserId,
+		OrderStatus:    createOrder.OrderStatus,
+		OrderCode:      createOrder.OrderCode,
+		OrderAddress:   createOrder.OrderAddress,
+		UserId:         createOrder.UserId,
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "order product successfully!", orderResponse))
 }
 
 func (h *orderHandler) GetOrderProduct(ctx *gin.Context) {
+	orderId := ctx.Param("id")
+	userId, isExist := ctx.Get("userID")
+	if !isExist {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "unauthorized", "Invalid token"))
+		return
+	}
+	order, err := h.repo.GetOrderById(fmt.Sprint(userId), orderId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find order", err.Error()))
+		return
+	}
 
-	id := ctx.Param("id")
-	order, err := h.repo.GetOrder(id)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
-		return
-	}
-	orderResponse, err := orderToOrderResponse(order)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when parse json to list order product", err.Error()))
-		return
-	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get product successfully!", orderResponse))
+	orderRes, err := orderToOrderResponse(order)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when parse json to list order product", err.Error()))
+			return
+		}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list order by user successfully!", orderRes))
 
 }
 
 func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
+	userId, isExist := ctx.Get("userID")
+	if !isExist {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "unauthorized", "Invalid token"))
+		return
+	}
 
 	// tạo query sort
-	sortBy := ctx.Query("sort-by")
+	sortBy := ctx.Query("sort") //sort params: asc, desc
 	if sortBy == "" {
-		sortBy = "order_id.asc" // sortBy is expected to look like field.orderdirection i. e. id.asc
-	}
-	sortQuery, err := helper.ValidateAndReturnSortQuery(model.Order{}, sortBy)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid param sort", err.Error()))
-		return
+		sortBy = "DESC" // sortBy is default DESC with column order_created_at
+	} else {
+		sortBy = strings.ToUpper(sortBy)
 	}
 
 	// tao query limit
@@ -155,7 +163,7 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	fmt.Println("param limit", strLimit)
 	limit := -1 // with a value as -1 for gorms Limit method, we'll get a request without limit as default
 	if strLimit != "" {
-		limit, err = strconv.Atoi(strLimit)
+		limit, err := strconv.Atoi(strLimit)
 		if err != nil || limit < -1 {
 			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "limit query parameter is no valid number", err.Error()))
 			return
@@ -166,32 +174,30 @@ func (h *orderHandler) GetAllOrderProduct(ctx *gin.Context) {
 	strOffset := ctx.Query("offset")
 	offset := -1
 	if strOffset != "" {
-		offset, err = strconv.Atoi(strOffset)
+		offset, err := strconv.Atoi(strOffset)
 		if err != nil || offset < -1 {
 			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "offset query parameter is no valid number", err.Error()))
 			return
 		}
 	}
 
-	// tạo query filter
-	filter := ctx.Query("filter")
-	filterMap := map[string]interface{}{}
-	if filter != "" {
-		filterMap, err = helper.ValidateAndReturnFilterMap(model.Order{}, filter)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid filter param ", err.Error()))
-			return
-		}
-	}
-
 	// gửi query
-	rsOrders, err := h.repo.GetAllOrderOptions(filterMap, limit, offset, sortQuery)
+	rsOrders, err := h.repo.GetAllOrderOptions(fmt.Sprint(userId), limit, offset, sortBy)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "not found !", err.Error()))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", rsOrders))
+	var orderResponses []response.OrderResponse
+	for _, o := range rsOrders {
+		orderRes, err := orderToOrderResponse(o)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when parse json to list order product", err.Error()))
+			return
+		}
+		orderResponses = append(orderResponses, orderRes)
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", orderResponses))
 }
 
 func (h *orderHandler) UpdateOrderStatus(ctx *gin.Context) {
@@ -253,13 +259,13 @@ func orderToOrderResponse(order model.Order) (response.OrderResponse, error) {
 		return response.OrderResponse{}, err
 	}
 	orderResponse := response.OrderResponse{
-		OrderId: order.OrderId,
-		OrderItems: orderItems,
+		OrderId:        order.OrderId,
+		OrderItems:     orderItems,
 		OrderCreatedAt: order.OrderCreatedAt,
-		OrderStatus: order.OrderStatus,
-		OrderCode: order.OrderCode,
-		OrderAddress: order.OrderAddress,
-		UserId: order.UserId,
+		OrderStatus:    order.OrderStatus,
+		OrderCode:      order.OrderCode,
+		OrderAddress:   order.OrderAddress,
+		UserId:         order.UserId,
 	}
 	return orderResponse, nil
 }

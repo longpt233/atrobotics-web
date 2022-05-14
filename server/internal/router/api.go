@@ -69,6 +69,8 @@ func RunAPI(address string) error {
 		// create order . chỉ cho tạo
 		userAuth.POST("/orders", orderHandler.OrderProduct) // gửi lên cái là chốt đơn.
 		userAuth.POST("/orders/update-status", orderHandler.UpdateOrderStatus)
+		userAuth.GET("/orders/:id", orderHandler.GetOrderProduct)
+		userAuth.GET("/orders", orderHandler.GetAllOrderProduct)
 		userAuth.GET("/cart/list", cartItems.GetCartItemsByUserId)
 		userAuth.POST("/cart/add", cartItems.AddCartItems)
 		userAuth.DELETE("/cart/:id", cartItems.DeleteCartItems)
@@ -101,9 +103,7 @@ func RunAPI(address string) error {
 		adminAuth.DELETE("/products/:id", productHandler.DeleteProduct)
 		adminAuth.PUT("/products/:id", productHandler.UpdateProduct)
 
-		// order info. không cho del, k cho tạo
-		adminAuth.GET("/orders", orderHandler.GetAllOrderProduct)
-		adminAuth.GET("/orders/:id", orderHandler.GetOrderProduct)
+		// order info, not allow delete or edit
 		adminAuth.PUT("/orders/:id", orderHandler.UpdateOrderStatus)
 		adminAuth.POST("/orders/update-status", orderHandler.UpdateOrderStatus)
 
