@@ -109,13 +109,13 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) { // TODO: transaction?
 		}
 	}
 	orderResponse := response.OrderResponse{
-		OrderId: createOrder.OrderId,
-		OrderItems: orderDetails,
+		OrderId:        createOrder.OrderId,
+		OrderItems:     orderDetails,
 		OrderCreatedAt: createOrder.OrderCreatedAt,
-		OrderStatus: createOrder.OrderStatus,
-		OrderCode: createOrder.OrderCode,
-		OrderAddress: createOrder.OrderAddress,
-		UserId: createOrder.UserId,
+		OrderStatus:    createOrder.OrderStatus,
+		OrderCode:      createOrder.OrderCode,
+		OrderAddress:   createOrder.OrderAddress,
+		UserId:         createOrder.UserId,
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "order product successfully!", orderResponse))
 }
@@ -125,7 +125,7 @@ func (h *orderHandler) GetOrderProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
 	order, err := h.repo.GetOrder(id)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product", err.Error()))
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find order", err.Error()))
 		return
 	}
 	orderResponse, err := orderToOrderResponse(order)
@@ -253,13 +253,13 @@ func orderToOrderResponse(order model.Order) (response.OrderResponse, error) {
 		return response.OrderResponse{}, err
 	}
 	orderResponse := response.OrderResponse{
-		OrderId: order.OrderId,
-		OrderItems: orderItems,
+		OrderId:        order.OrderId,
+		OrderItems:     orderItems,
 		OrderCreatedAt: order.OrderCreatedAt,
-		OrderStatus: order.OrderStatus,
-		OrderCode: order.OrderCode,
-		OrderAddress: order.OrderAddress,
-		UserId: order.UserId,
+		OrderStatus:    order.OrderStatus,
+		OrderCode:      order.OrderCode,
+		OrderAddress:   order.OrderAddress,
+		UserId:         order.UserId,
 	}
 	return orderResponse, nil
 }
