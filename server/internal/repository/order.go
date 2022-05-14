@@ -10,9 +10,9 @@ import (
 type OrderRepository interface {
 	OrderProduct(model.Order) (model.Order, error)
 	GetAllOrder() ([]model.Order, error)
-	GetOrder(string) (model.Order, error)
+	GetOrderById(string, string) (model.Order, error)
 	UpdateOrderStatus(string, int) (model.Order, error)
-	GetAllOrderOptions(filter map[string]interface{}, limit int, offset int, query string) ([]model.Order, error)
+	GetAllOrderOptions(userId string, limit int, offset int, sortBy string) ([]model.Order, error)
 }
 
 type orderRepository struct {
@@ -34,8 +34,8 @@ func (db *orderRepository) GetAllOrder() (orders []model.Order, err error) {
 	return orders, db.connection.Find(&orders).Error
 }
 
-func (db *orderRepository) GetOrder(id string) (order model.Order, err error) {
-	return order, db.connection.First(&order, "order_id=?", id).Error
+func (db *orderRepository) GetOrderById(userId string, orderId string) (order model.Order, err error) {
+	return order, db.connection.Find(&order, "user_id=? and order_id=?", userId, orderId).Error
 }
 
 func (db *orderRepository) UpdateOrderStatus(orderId string, status int) (model.Order, error) {
@@ -46,6 +46,6 @@ func (db *orderRepository) UpdateOrderStatus(orderId string, status int) (model.
 	return checkOrder, db.connection.Model(&checkOrder).Where("order_id=?",orderId).Update("order_status",status).Error
 }
 
-func (db *orderRepository) GetAllOrderOptions(filter map[string]interface{}, limit int, offset int, query string) (orders []model.Order, err error) {
-	return orders, db.connection.Where(filter).Limit(limit).Offset(offset).Order(query).Find(&orders).Error
+func (db *orderRepository) GetAllOrderOptions(userId string, limit int, offset int, sortBy string) (orders []model.Order, err error) {
+	return orders, db.connection.Where("user_id=?",userId).Limit(limit).Offset(offset).Order("order_created_at "+sortBy).Find(&orders).Error
 }
