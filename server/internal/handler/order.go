@@ -55,7 +55,10 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) { // TODO: transaction?
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when get list cart items", err))
 		return
 	}
-
+	if len(listCartItems) == 0 {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cart items is empty, please choose product to order", err))
+		return
+	}
 	var orderDetails []model.OrderProduct
 	for _, cItems := range listCartItems {
 		product, err := h.repoProduct.GetProduct(cItems.CartProductId)
@@ -63,16 +66,20 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) { // TODO: transaction?
 			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "product is not exist", err))
 			return
 		}
+		var productImgs []string
+		err = json.Unmarshal([]byte(product.ProductImages), &productImgs)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when get first product images", err))
+		}
 		orderProduct := model.OrderProduct{
 			ProductId:        product.ProductID,
 			ProductName:      product.ProductName,
-			ProductImage:     product.ProductImages,
+			ProductImage:     productImgs[0],
 			CurrentPrice:     product.ProductPrice,
 			Quantity:         cItems.CartQuantity,
 			ShortDescription: product.ProductShortDesc,
 			Colors:           cItems.CartColor,
 		}
-
 		orderDetails = append(orderDetails, orderProduct)
 	}
 	orderDetailsStr, err := json.Marshal(orderDetails)
