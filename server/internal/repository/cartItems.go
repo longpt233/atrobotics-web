@@ -27,9 +27,11 @@ func NewCartItemsRepository() CartItemsRepository {
 func (db *cartItemsRepository) GetCartItemsByUserId(userId string) (listCartItems []model.CardItems, err error){
 	return listCartItems, db.connection.Find(&listCartItems,"cart_user_id=?",userId).Error
 }
+
 func (db *cartItemsRepository) AddCartItems(cartItems model.CardItems) (model.CardItems, error){
 	return cartItems, db.connection.Create(&cartItems).Error
 }
+
 func (db *cartItemsRepository) DeleteCartItems(cartId string) (model.CardItems, error){
 	var cartItems model.CardItems
 	if err := db.connection.First(&cartItems,"cart_id=?",cartId).Error; err != nil{
@@ -38,6 +40,7 @@ func (db *cartItemsRepository) DeleteCartItems(cartId string) (model.CardItems, 
 
 	return cartItems, db.connection.Delete(&cartItems, "cart_id=?",cartId).Error
 }
+
 func (db *cartItemsRepository) UpdateCartItems(modifyCartItems model.CardItems) (model.CardItems, error){
 	var checkCartItems model.CardItems
 	if err := db.connection.First(&checkCartItems,"cart_id=?",modifyCartItems.CartId).Error; err != nil{

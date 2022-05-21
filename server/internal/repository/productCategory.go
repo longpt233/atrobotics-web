@@ -24,15 +24,19 @@ func NewProductCategoryRepository() ProductCategoryRepository {
 		connection: DB(),
 	}
 }
+
 func (db *productCategoryRepository) GetProductCategory(id string) (productCategory model.ProductCategory, err error) {
 	return productCategory, db.connection.First(&productCategory, "product_category_id=?", id).Error
 }
+
 func (db *productCategoryRepository) GetAllProductCategories() (productCategories []model.ProductCategory, err error) {
 	return productCategories, db.connection.Find(&productCategories).Error
 }
+
 func (db *productCategoryRepository) AddProductCategory(productCategory model.ProductCategory) (model.ProductCategory, error) {
 	return productCategory, db.connection.Create(&productCategory).Error
 }
+
 func (db *productCategoryRepository) DeleteProductCategory(id string) (model.ProductCategory, error) {
 	var category model.ProductCategory
 	if err := db.connection.First(&category, "product_category_id=?", id).Error; err != nil {
@@ -40,6 +44,7 @@ func (db *productCategoryRepository) DeleteProductCategory(id string) (model.Pro
 	}
 	return category, db.connection.Delete(&category, "product_category_id=?", category.ProductCategoryID).Error
 }
+
 func (db *productCategoryRepository) UpdateProductCategory(category model.ProductCategory) (model.ProductCategory, error) {
 	var checkCategory model.ProductCategory
 	if err := db.connection.First(&checkCategory, "product_category_id=?", category.ProductCategoryID).Error; err != nil {
