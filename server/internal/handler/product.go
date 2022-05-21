@@ -137,6 +137,7 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "offset query parameter is no valid number", err.Error()))
 			return
 		}
+		offset = offset - 1
 	}
 
 	// tạo query filter
@@ -171,36 +172,35 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 		}
 		rsProducts = append(rsProducts, p)
 	}
-		
 
 	productsCountAll, err := h.repo.GetAllProductWithOptions(filterMap, -1, -1, sortQuery, pattern)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "cant not count all ?? ", err.Error()))
 		return
 	}
-	
+
 	returnData := map[string]interface{}{
-		"data" : rsProducts,
-		"total" : len(productsCountAll),
+		"data":  rsProducts,
+		"total": len(productsCountAll),
 	}
 
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list products successfully!", returnData))
 
 }
 
-func (h *productHandler) GetAllProductBrand(ctx *gin.Context){
-	listBrand, err := h.repo.GetAllProductBrand();
-	if(err != nil){
+func (h *productHandler) GetAllProductBrand(ctx *gin.Context) {
+	listBrand, err := h.repo.GetAllProductBrand()
+	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when get all brand", err))
 		return
 	}
 	var brands []string
-	for i:= 0; i<len(listBrand) ; i++ {
+	for i := 0; i < len(listBrand); i++ {
 		brands = append(brands, listBrand[i].ProductBrand)
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"get list brand successfully", brands))
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list brand successfully", brands))
 }
-func (h *productHandler) SearchByShortDescription(ctx *gin.Context){
+func (h *productHandler) SearchByShortDescription(ctx *gin.Context) {
 	pattern := ctx.Query("q")
 
 	listProduct, err := h.repo.SearchByShortDescription(pattern)
@@ -218,9 +218,9 @@ func (h *productHandler) SearchByShortDescription(ctx *gin.Context){
 		}
 		rsProducts = append(rsProducts, p)
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"search successfully", rsProducts))
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "search successfully", rsProducts))
 }
-func (h *productHandler) GetProductByCategory(ctx *gin.Context){
+func (h *productHandler) GetProductByCategory(ctx *gin.Context) {
 	categoryId := ctx.Query("categoryId")
 
 	category, err := repository.NewProductCategoryRepository().GetProductCategory(categoryId)
@@ -243,5 +243,5 @@ func (h *productHandler) GetProductByCategory(ctx *gin.Context){
 		}
 		rsProducts = append(rsProducts, p)
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1,"get list product by category successfully", rsProducts))
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list product by category successfully", rsProducts))
 }

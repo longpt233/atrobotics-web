@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type CardItems struct {
 	CartId          string    `json:"id" gorm:"column:cart_id" gorm:"primaryKey"`
