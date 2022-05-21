@@ -60,7 +60,7 @@ func (db *productRepository) CountProduct() (count int, err error) {
 }
 
 func (db *productRepository) GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, order string, searchPattern string) (products []model.Product, err error) {
-	return products, db.connection.Where(filter).Where("product_short_desc LIKE ?", "%"+searchPattern+"%").Limit(limit).Offset(offset).Order(order).Find(&products).Error
+	return products, db.connection.Where(filter).Where("product_name LIKE ?", "%"+searchPattern+"%").Limit(limit).Offset(offset).Order(order).Find(&products).Error
 }
 
 func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
