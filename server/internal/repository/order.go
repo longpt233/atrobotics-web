@@ -21,8 +21,10 @@ type orderRepository struct {
 
 //NewOrderRepository --> returns new order repository
 func NewOrderRepository() OrderRepository {
+	
+	myclient := &MySQLClient{}
 	return &orderRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 

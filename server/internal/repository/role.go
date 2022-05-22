@@ -17,8 +17,11 @@ type roleRepository struct {
 }
 
 func NewRoleRepository() RoleRepository {
+	 
+
+	myclient := &MySQLClient{}
 	return &roleRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 

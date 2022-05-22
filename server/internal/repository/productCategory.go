@@ -20,8 +20,11 @@ type productCategoryRepository struct {
 }
 
 func NewProductCategoryRepository() ProductCategoryRepository {
+	 
+
+	myclient := &MySQLClient{}
 	return &productCategoryRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 

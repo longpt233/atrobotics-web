@@ -19,8 +19,9 @@ type bannerRepository struct{
 }
 
 func NewBannerRepository() BannerRepository{
+	myclient := &MySQLClient{}
 	return &bannerRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 
