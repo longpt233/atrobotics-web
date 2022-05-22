@@ -9,8 +9,14 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+
+type MySQLClient struct {
+	db *gorm.DB
+}
+
+
 //TODO: singleton, close connection
-func DB() *gorm.DB {
+func (myclient *MySQLClient) GetConn() *gorm.DB {
 
 	conn := os.Getenv("DB_USERNAME") + ":" + os.Getenv("DB_PASSWORD") + "@tcp(" + os.Getenv("ATRO_HOST") + ":" + os.Getenv("DB_PORT") + ")/" + os.Getenv("DB_NAME") + "?parseTime=true"
 
@@ -27,3 +33,8 @@ func DB() *gorm.DB {
 	db.AutoMigrate()
 	return db
 }
+
+func (myclient *MySQLClient) Close(){
+	myclient.db.Close()
+}
+

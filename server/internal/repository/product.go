@@ -20,8 +20,10 @@ type productRepository struct {
 
 //NewProductRepository --> returns new product repository
 func NewProductRepository() ProductRepository {
+
+	myclient := &MySQLClient{}
 	return &productRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 

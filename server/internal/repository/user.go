@@ -19,8 +19,10 @@ type userRepository struct {
 
 //NewUserRepository --> returns new user repository
 func NewUserRepository() UserRepository {
+	 
+	myclient := &MySQLClient{}
 	return &userRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 
