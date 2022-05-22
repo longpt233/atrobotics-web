@@ -48,9 +48,9 @@ func (h *cartItemsHandler) AddCartItems(ctx *gin.Context) {
 		return
 	}
 	checkExistCart, err := repository.NewCartItemsRepository().GetCartItemsByUserIdAndProductId(strUserId, newCartItems.CartProductId)
-	var rsCartItems model.CardItems
+	var rsCartItems model.CartItems
 	if err != nil{
-		rsCartItems = model.CardItems{
+		rsCartItems = model.CartItems{
 			CartId:        uuid.NewString(),
 			CartUserId:    strUserId,
 			CartProductId: newCartItems.CartProductId,
@@ -66,9 +66,9 @@ func (h *cartItemsHandler) AddCartItems(ctx *gin.Context) {
 		}
 		ctx.JSON(http.StatusOK, helper.BuildResponse(1, "add cart items successfully!", cartItems))
 	} else {
-		var cartItems model.CardItems
+		var cartItems model.CartItems
 		if checkExistCart.CartColor != newCartItems.CartColor {
-			rsCartItems = model.CardItems{
+			rsCartItems = model.CartItems{
 				CartId:        uuid.NewString(),
 				CartUserId:    strUserId,
 				CartProductId: newCartItems.CartProductId,
@@ -84,7 +84,7 @@ func (h *cartItemsHandler) AddCartItems(ctx *gin.Context) {
 			}
 			ctx.JSON(http.StatusOK, helper.BuildResponse(1, "add cart items successfully!", cartItems))
 		}else {
-			rsCartItems = model.CardItems{
+			rsCartItems = model.CartItems{
 				CartId:        checkExistCart.CartId,
 				CartUserId:    strUserId,
 				CartProductId: newCartItems.CartProductId,
@@ -145,7 +145,7 @@ func (h *cartItemsHandler) UpdateCartItems(ctx *gin.Context) {
 		return
 	}
 	id := ctx.Param("id")
-	modifyCart := model.CardItems{
+	modifyCart := model.CartItems{
 		CartId:        id,
 		CartUserId:    fmt.Sprint(userId),
 		CartProductId: requestCart.CartProductId,

@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type CardItems struct {
+type CartItems struct {
 	CartId          string    `json:"id" gorm:"column:cart_id" gorm:"primaryKey"`
 	CartUserId      string    `json:"userId" gorm:"column:cart_user_id"`
 	CartProductId   string    `json:"productId" gorm:"column:cart_product_id"`
@@ -15,6 +15,6 @@ type CardItems struct {
 	CartColor       string    `json:"color" gorm:"column:cart_color"`
 }
 
-func (CardItems) TableName() string {
+func (CartItems) TableName() string {
 	return "cart_items"
 }
