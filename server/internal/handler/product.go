@@ -154,6 +154,15 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 	// tao query search
 	pattern := ctx.Query("q") // default ""
 
+	
+	productsCountAll, err := h.repo.GetAllProductWithOptions(filterMap, -1, -1, sortQuery, pattern)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "cant not count all ?? ", err.Error()))
+		return
+	}
+
+	offset = offset * int(len(productsCountAll)/limit)
+
 	// gửi query
 	products, err := h.repo.GetAllProductWithOptions(filterMap, limit, offset, sortQuery, pattern)
 	if err != nil {
@@ -171,12 +180,6 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 			return
 		}
 		rsProducts = append(rsProducts, p)
-	}
-
-	productsCountAll, err := h.repo.GetAllProductWithOptions(filterMap, -1, -1, sortQuery, pattern)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "cant not count all ?? ", err.Error()))
-		return
 	}
 
 	returnData := map[string]interface{}{

@@ -19,8 +19,11 @@ type cartItemsRepository struct {
 }
 
 func NewCartItemsRepository() CartItemsRepository {
+ 
+
+	myclient := &MySQLClient{}
 	return &cartItemsRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 

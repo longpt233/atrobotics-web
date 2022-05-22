@@ -19,8 +19,10 @@ type deliveryAddressRepository struct {
 }
 
 func NewDeliveryAddressRepository() DeliveryAddressRepository{
+	 
+	myclient := &MySQLClient{}
 	return &deliveryAddressRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 

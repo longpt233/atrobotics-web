@@ -17,8 +17,10 @@ type otpRepository struct {
 }
 
 func NewOtpRepository() OtpRepository {
+	 
+	myclient := &MySQLClient{}
 	return &otpRepository{
-		connection: DB(),
+		connection:myclient.GetConn(),
 	}
 }
 
