@@ -29,12 +29,7 @@ func NewCartItemsRepository() CartItemsRepository {
 func (db *cartItemsRepository) GetCartItemsByUserId(userId string) (listCartItems []model.CartItems, err error) {
 
 	// var  cartItem model.CartItems
-	return listCartItems, db.connection.
-		Select("cart_items.*, products.*").
-		Where("cart_user_id=?", userId).
-		Joins("join products as products on products.product_id = cart_items.cart_product_id").
-		// Preload("CartItems").
-		Find(&listCartItems).Error
+	return listCartItems, db.connection.Find(&listCartItems,"cart_user_id=?",userId).Error
 }
 
 func (db *cartItemsRepository) AddCartItems(cartItems model.CartItems) (model.CartItems, error) {

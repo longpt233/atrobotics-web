@@ -4,6 +4,7 @@ import (
 	"atro/internal/helper"
 	"atro/internal/model"
 	"atro/internal/model/request"
+	"atro/internal/model/response"
 	"atro/internal/repository"
 	"fmt"
 	"net/http"
@@ -125,6 +126,20 @@ func (h *cartItemsHandler) GetCartItemsByUserId(ctx *gin.Context) {
 		return
 	}
 	listCart, err := h.repo.GetCartItemsByUserId(fmt.Sprint(userId))
+	for i := 0; i<len(listCart) ; i++ {
+		product, err := repository.NewProductRepository().GetProduct(listCart[i].CartProductId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find product with id - "+ listCart[i].CartProductId, err.Error()))
+			return
+		}
+		var p response.ProductResponse
+		p, err = p.ProductToProductResponse(product)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to array", err.Error()))
+			return
+		}
+		listCart[i].CartProductData = p
+	}
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when find cart items", err.Error()))
 		return
