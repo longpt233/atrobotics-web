@@ -36,6 +36,10 @@ func (h *cartItemsHandler) AddCartItems(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "invalid request body", err.Error()))
 		return
 	}
+	if(newCartItems.CartQuantity <= 0){
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Số lượng sản phẩm không hợp lệ", ""))
+		return
+	}
 	userId, isExist := ctx.Get("userID")
 	if !isExist {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "unauthorized", "Invalid token"))
@@ -142,6 +146,10 @@ func (h *cartItemsHandler) UpdateCartItems(ctx *gin.Context) {
 	}
 	if err := ctx.ShouldBindJSON(&requestCart); err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Invalid request body", err.Error()))
+		return
+	}
+	if(requestCart.CartQuantity <= 0){
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Số lượng sản phẩm không hợp lệ", ""))
 		return
 	}
 	id := ctx.Param("id")
