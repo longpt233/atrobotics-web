@@ -7,6 +7,7 @@ import (
 	"atro/internal/repository"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -112,7 +113,7 @@ func (h *userHandler) GetUser(ctx *gin.Context) {
 		checkUser, err := repository.NewUserRepository().GetUser(fmt.Sprint(userID))
 		if err == nil {
 			ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get user information successfully!", checkUser))
-			return 
+			return
 		} else {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find USER", err.Error()))
 		}
@@ -173,17 +174,68 @@ func (h *userHandler) ChangePassword(ctx *gin.Context) {
 	}
 }
 func (h *userHandler) GetAllUser(ctx *gin.Context) {
+
 	userRole, err := repository.NewRoleRepository().GetRoleByName("USER")
+
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find USER role", err.Error()))
 		return
 	}
-	listUser, err := h.repo.GetAllUser(userRole.RoleID)
+
+	adminRole, err := repository.NewRoleRepository().GetRoleByName("ADMIN")
+
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when find USER role", err.Error()))
+		return
+	}
+
+	// tao query limit
+	strLimit := ctx.Query("limit")
+	fmt.Println("param limit", strLimit)
+	limit := -1 // with a value as -1 for gorms Limit method, we'll get a request without limit as default
+	if strLimit != "" {
+		limit, err = strconv.Atoi(strLimit)
+		if err != nil || limit < -1 {
+			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "limit query parameter is no valid number", err.Error()))
+			return
+		}
+	}
+
+	// tạo query offset
+	strOffset := ctx.Query("offset")
+	offset := -1
+	if strOffset != "" {
+		offset, err = strconv.Atoi(strOffset)
+		if err != nil || offset < -1 {
+			ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "offset query parameter is no valid number", err.Error()))
+			return
+		}
+		offset = offset - 1
+	}
+
+	userCountAll, err := h.repo.GetAllUserPaging(userRole.RoleID,adminRole.RoleID,-1, -1)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "cant not count all ?? ", err.Error()))
+		return
+	}
+
+	offset = offset * int(len(userCountAll)/limit)
+
+	listUser, err := h.repo.GetAllUserPaging(userRole.RoleID,adminRole.RoleID,limit,offset)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Error when get all users", err.Error()))
 		return
 	}
-	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list user successfully", listUser))
+
+
+	returnData := map[string]interface{}{
+		"data":  listUser,
+		"total": len(userCountAll),
+	}
+
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list user successfully", returnData))
+
+
 }
 func (h *userHandler) ForgotPassword(ctx *gin.Context) {
 	userEmail := ctx.Query("email")
@@ -207,7 +259,7 @@ func (h *userHandler) ForgotPassword(ctx *gin.Context) {
 
 	newOtp := model.Otp{
 		OtpId:        uuid.NewString(),
-		UserId: user.UserID,
+		UserId:       user.UserID,
 		OtpCreateAt:  time.Now(),
 		OtpUpdateAt:  time.Now(),
 		OtpUsedOk:    0,
@@ -231,7 +283,7 @@ func (h *userHandler) VerifyOtp(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Invalid Params", err.Error()))
 		return
 	}
-	_ , err := h.repo.GetUser(otpRequest.UserId)
+	_, err := h.repo.GetUser(otpRequest.UserId)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "User is not existed", err.Error()))
 		return
@@ -252,7 +304,7 @@ func (h *userHandler) VerifyOtp(ctx *gin.Context) {
 			}
 			ctx.JSON(http.StatusOK, helper.BuildResponse(1, "verify otp success", ""))
 			return
-		}else {
+		} else {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, helper.BuildResponse(-1, "Otp is expired", err.Error()))
 			return
 		}

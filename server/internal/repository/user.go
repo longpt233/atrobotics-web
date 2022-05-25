@@ -12,6 +12,7 @@ type UserRepository interface {
 	AddUser(user model.User) (model.User, error)
 	UpdateUser(user model.User) (model.User, error)
 	GetAllUser(string) ([]model.User, error)
+	GetAllUserPaging(userId string,adminId string, limit int ,offset int ) (listUser []model.User, err error)
 }
 
 type userRepository struct {
@@ -48,4 +49,9 @@ func (db *userRepository) UpdateUser(user model.User) (model.User, error){
 
 func (db *userRepository) GetAllUser(roleId string) (listUser []model.User, err error){
 	return listUser, db.connection.Find(&listUser, "user_role_id=?",roleId).Error
+}
+
+
+func (db *userRepository) GetAllUserPaging(userId string,adminId string,limit int ,offset int) (listUser []model.User, err error){
+	return listUser, db.connection.Limit(limit).Offset(offset).Find(&listUser, "user_role_id=? or user_role_id=? ",userId, adminId).Error
 }
