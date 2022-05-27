@@ -1,0 +1,5 @@
+@import '@/assets/styles/variables.scss';
+
+.fb_dialog {
+  z-index: map-get($zIndex, 'popup') !important;
+}

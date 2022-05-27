@@ -1,0 +1,12 @@
+@use '~element-plus/theme-chalk/src/mixins/mixins' as *;
+@use '@/assets/styles/variables.scss' as *;
+
+@include b(pagination) {
+  li.is-active {
+    background-color: $color-primary !important;
+  }
+  li:not(.is-active):hover {
+    color: $color-primary !important;
+    font-weight: 500 !important;
+  }
+}

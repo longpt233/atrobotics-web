@@ -1,0 +1,17 @@
+@mixin limit-by-n-line($number-line) {
+  display: -webkit-box;
+  -webkit-line-clamp: $number-line;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin set-background-color($new-color) {
+  background-color: $new-color;
+  &:hover,
+  &:focus,
+  &:disabled,
+  &:disabled:hover,
+  &:disabled:focus {
+    background-color: $new-color;
+  }
+}

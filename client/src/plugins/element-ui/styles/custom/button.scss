@@ -1,0 +1,23 @@
+@use '~element-plus/theme-chalk/src/mixins/mixins' as *;
+@use '@/assets/styles/mixins.scss' as *;
+@use '@/assets/styles/variables.scss' as *;
+
+@mixin default-color() {
+  color: $color-white;
+  background-color: $color-primary;
+}
+
+@include b(button) {
+  color: $color-white;
+  @include set-background-color($color-primary);
+  border-radius: 0;
+  border: none;
+  &:hover {
+    opacity: 0.9;
+  }
+  &.is-disabled,
+  &.is-disabled:hover,
+  &.is-disabled:focus {
+    opacity: 0.5;
+  }
+}

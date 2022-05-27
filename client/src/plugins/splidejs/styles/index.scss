@@ -1,0 +1,13 @@
+@import '@splidejs/vue-splide/css';
+@import '@splidejs/splide/src/css/template/default/object/objects/arrow';
+
+.splide {
+  &__arrow {
+    width: 42px;
+    height: 42px;
+    background-color: $color-light-grey-1;
+    svg {
+      opacity: 0.4;
+    }
+  }
+}

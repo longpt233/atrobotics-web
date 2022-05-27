@@ -1,12 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300&display=swap');
-
-* {
-  font-family: 'Josefin Sans', sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap');
+body {
+  font-family: 'Roboto';
   margin: 0;
 }
 
-.button {
-  cursor: pointer;
+.router-link {
+  text-decoration: none;
+  color: inherit;
+  &:hover {
+    color: unset;
+  }
 }
 
-@import '~element-plus/theme-chalk/src/index';
+.error-message {
+  color: $color-red;
+  text-align: start;
+}

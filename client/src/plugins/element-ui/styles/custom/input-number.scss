@@ -1,0 +1,7 @@
+@use '~element-plus/theme-chalk/src/mixins/mixins' as *;
+@use '@/assets/styles/mixins.scss' as *;
+@use '@/assets/styles/variables.scss' as *;
+
+@include b(input-number) {
+  width: 110px !important;
+}

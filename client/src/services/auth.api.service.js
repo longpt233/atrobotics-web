@@ -1,39 +1,11 @@
-import axiosConfig from '../config/axiosConfig';
+import axiosService from '@/plugins/axios';
+
 class AuthApiService {
-  /**
-   * Login API for user and admin
-   * @param {String} email
-   * @param {String} password
-   * @returns response of API
-   */
-  async login(email, password) {
-    let response;
-    try {
-      response = axiosConfig.post('/user/login', {
-        email: email,
-        password: password,
-      });
-    } catch (error) {
-      console.log(error);
-      return;
-    }
-    return response;
+  async login(loginForm) {
+    return await axiosService.post('/user/login', loginForm);
   }
-  
-  /**
-   * Register API for user
-   * @param {Object} registerForm 
-   * @returns response of API
-   */
   async register(registerForm) {
-    let response;
-    try {
-      response = axiosConfig.post('/user/register', registerForm);
-    } catch (error) {
-      console.log(error);
-      return;
-    }
-    return response;
+    return await axiosService.post('/user/register', registerForm);
   }
 }
 
