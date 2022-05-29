@@ -8,6 +8,7 @@ import (
 	"atro/internal/repository"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -148,32 +149,22 @@ func (h *cartItemsHandler) GetCartItemsByUserId(ctx *gin.Context) {
 }
 
 func (h *cartItemsHandler) UpdateCartItems(ctx *gin.Context) {
-	var requestCart request.CartItemsRequest
 	userId, isExist := ctx.Get("userID")
 	if !isExist {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "unauthorized", "Invalid token"))
 		return
 	}
-	_, errProduct := repository.NewProductRepository().GetProduct(requestCart.CartProductId)
-	if errProduct != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "product id not found", errProduct.Error()))
-		return
-	}
-	if err := ctx.ShouldBindJSON(&requestCart); err != nil {
-		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Invalid request body", err.Error()))
-		return
-	}
-	if(requestCart.CartQuantity <= 0){
+	id := ctx.Param("id")
+	quantity := ctx.Query("quantity")
+	intQuantity, err := strconv.Atoi(quantity)
+	if err != nil || intQuantity <= 0{
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Số lượng sản phẩm không hợp lệ", ""))
 		return
 	}
-	id := ctx.Param("id")
 	modifyCart := model.CartItems{
 		CartId:        id,
 		CartUserId:    fmt.Sprint(userId),
-		CartProductId: requestCart.CartProductId,
-		CartQuantity:  requestCart.CartQuantity,
-		CartColor:     requestCart.CartColor,
+		CartQuantity:  intQuantity,
 		CartUpdatedAt: time.Now(),
 	}
 	rsCartItems, err := h.repo.UpdateCartItems(modifyCart)

@@ -51,6 +51,7 @@ func RunAPI(address string) error {
 		// xem liên quan
 		userRoutes.GET("/products", productHandler.GetAllProduct)
 		userRoutes.GET("/products/:id", productHandler.GetProduct)
+		userRoutes.GET("/products/product-category-list", productHandler.GetListProductForAllCategory)
 		userRoutes.GET("/products/by-category", productHandler.GetProductByCategory)
 		userRoutes.GET("/categories", productCategoryHandler.GetAllProductCategories)
 		userRoutes.GET("/categories/:id", productCategoryHandler.GetProductCategory)
