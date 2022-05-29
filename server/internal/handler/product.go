@@ -23,6 +23,7 @@ type ProductHandler interface {
 	GetAllProductBrand(*gin.Context)
 	SearchByShortDescription(*gin.Context)
 	GetProductByCategory(*gin.Context)
+	GetListProductForAllCategory(*gin.Context)
 }
 
 type productHandler struct {
@@ -247,4 +248,35 @@ func (h *productHandler) GetProductByCategory(ctx *gin.Context) {
 		rsProducts = append(rsProducts, p)
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list product by category successfully", rsProducts))
+}
+
+func (h *productHandler) GetListProductForAllCategory(ctx *gin.Context){
+	listCategory, err := repository.NewProductCategoryRepository().GetAllProductCategories()
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when get list category", err))
+		return
+	}
+	var responseList response.ListProductAllCategoryResponse
+
+	for i:=0; i<len(listCategory); i++ {
+		responseList.CategoryName = listCategory[i].CategoryName
+
+		listProduct, err := h.repo.GetProductByCategory(listCategory[i].ProductCategoryID)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when get product list by category", err))
+			return
+		}
+		for j := 0; j < len(listProduct); i++ {
+			var p response.ProductResponse
+			p, err := p.ProductToProductResponse(listProduct[j])
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to array", err.Error()))
+				return
+			}
+			responseList.ProductList = append(responseList.ProductList, p)
+		}
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list product for all category", responseList))
+	return
 }
