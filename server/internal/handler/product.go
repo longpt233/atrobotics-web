@@ -277,7 +277,6 @@ func (h *productHandler) GetListProductForAllCategory(ctx *gin.Context){
 			responseList.ProductList = append(responseList.ProductList, p)
 		}
 	}
-	fmt.Print(responseList)
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list product for all category", responseList))
 	return
 }
