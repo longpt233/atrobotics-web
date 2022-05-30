@@ -76,5 +76,5 @@ func (db *productRepository) SearchByShortDescription(pattern string) ([]model.P
 	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_short_desc LIKE '%" + pattern + "%'").Scan(&listProduct).Error
 }
 func (db *productRepository) GetProductByCategory(categoryId string) (listProduct []model.Product, err error) {
-	return listProduct, db.connection.Find(&listProduct, "product_category_id=?", categoryId).Limit(4).Error
+	return listProduct, db.connection.Find(&listProduct, "product_category_id=?", categoryId).Limit(6).Error
 }
