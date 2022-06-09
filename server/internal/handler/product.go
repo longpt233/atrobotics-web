@@ -269,10 +269,11 @@ func (h *productHandler) GetListProductForAllCategory(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(0, "error when get list category", err))
 		return
 	}
-	var responseList response.ListProductAllCategoryResponse
+	var responseList []response.ListProductAllCategoryResponse
+	var res response.ListProductAllCategoryResponse
 
 	for i := 0; i < len(listCategory); i++ {
-		responseList.CategoryName = listCategory[i].CategoryName
+		res.CategoryName = listCategory[i].CategoryName
 
 		listProduct, err := h.repo.GetProductByCategory(listCategory[i].ProductCategoryID)
 		if err != nil {
@@ -286,8 +287,9 @@ func (h *productHandler) GetListProductForAllCategory(ctx *gin.Context) {
 				ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Cant convert json to array", err.Error()))
 				return
 			}
-			responseList.ProductList = append(responseList.ProductList, p)
+			res.ProductList = append(res.ProductList, p)
 		}
+		responseList = append(responseList, res)
 	}
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list product for all category", responseList))
 	return
