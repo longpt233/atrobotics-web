@@ -4,6 +4,7 @@ import (
 	"atro/internal/model"
 
 	"github.com/jinzhu/gorm"
+	"strings"
 )
 
 type ProductRepository interface {
@@ -72,6 +73,7 @@ func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
 
 func (db *productRepository) SearchByShortDescription(pattern string) ([]model.Product, error) {
 	var listProduct []model.Product
+	var pattern_new = strings.ReplaceAll(pattern, " ", "%")
 
 	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_name LIKE '%" + pattern + "%'").Scan(&listProduct).Error
 }
