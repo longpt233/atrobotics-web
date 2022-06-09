@@ -74,7 +74,7 @@ func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
 
 func (db *productRepository) SearchByShortDescription(pattern string) ([]model.Product, error) {
 	var listProduct []model.Product
-	var pattern_new = strings.ReplaceAll(pattern, " ", "%")
+	var pattern_new = strings.ReplaceAll(pattern, " ", "%").ReplaceAll(pattern, "%20", "%")
 	fmt.Println(pattern_new)
 
 	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_name LIKE '%" + pattern_new + "%'").Scan(&listProduct).Error
