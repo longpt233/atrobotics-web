@@ -8,6 +8,7 @@ import (
 	"atro/internal/repository"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -152,10 +153,14 @@ func (h *productHandler) GetAllProduct(ctx *gin.Context) {
 		}
 	}
 
+	q, err := url.ParseQuery(ctx.Request.URL.RawQuery)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "cant not parse url", err.Error()))
+		return
+	}
 	// tao query search
-	pattern := ctx.Query("q") // default ""
+	pattern := q.Get("q") // default ""
 
-	
 	productsCountAll, err := h.repo.GetAllProductWithOptions(filterMap, -1, -1, sortQuery, pattern)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "cant not count all ?? ", err.Error()))
@@ -205,7 +210,14 @@ func (h *productHandler) GetAllProductBrand(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list brand successfully", brands))
 }
 func (h *productHandler) SearchByShortDescription(ctx *gin.Context) {
-	pattern := ctx.Query("q")
+
+	q, err := url.ParseQuery(ctx.Request.URL.RawQuery)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "cant not parse url", err.Error()))
+		return
+	}
+	// tao query search
+	pattern := q.Get("q")
 
 	listProduct, err := h.repo.SearchByShortDescription(pattern)
 	if err != nil {
@@ -250,7 +262,7 @@ func (h *productHandler) GetProductByCategory(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list product by category successfully", rsProducts))
 }
 
-func (h *productHandler) GetListProductForAllCategory(ctx *gin.Context){
+func (h *productHandler) GetListProductForAllCategory(ctx *gin.Context) {
 	listCategory, err := repository.NewProductCategoryRepository().GetAllProductCategories()
 
 	if err != nil {
@@ -259,7 +271,7 @@ func (h *productHandler) GetListProductForAllCategory(ctx *gin.Context){
 	}
 	var responseList response.ListProductAllCategoryResponse
 
-	for i:=0; i<len(listCategory); i++ {
+	for i := 0; i < len(listCategory); i++ {
 		responseList.CategoryName = listCategory[i].CategoryName
 
 		listProduct, err := h.repo.GetProductByCategory(listCategory[i].ProductCategoryID)

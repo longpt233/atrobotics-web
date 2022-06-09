@@ -2,10 +2,9 @@ package repository
 
 import (
 	"atro/internal/model"
+	"strings"
 
 	"github.com/jinzhu/gorm"
-	"strings"
-	"fmt"
 )
 
 type ProductRepository interface {
@@ -29,7 +28,7 @@ func NewProductRepository() ProductRepository {
 
 	myclient := &MySQLClient{}
 	return &productRepository{
-		connection:myclient.GetConn(),
+		connection: myclient.GetConn(),
 	}
 }
 
@@ -64,7 +63,10 @@ func (db *productRepository) CountProduct() (count int, err error) {
 }
 
 func (db *productRepository) GetAllProductWithOptions(filter map[string]interface{}, limit int, offset int, order string, searchPattern string) (products []model.Product, err error) {
-	return products, db.connection.Where(filter).Where("product_name LIKE ?", "%"+searchPattern+"%").Limit(limit).Offset(offset).Order(order).Find(&products).Error
+
+	var pattern_new = strings.ReplaceAll(searchPattern, " ", "%")
+
+	return products, db.connection.Where(filter).Where("product_name LIKE ?", "%"+pattern_new+"%").Limit(limit).Offset(offset).Order(order).Find(&products).Error
 }
 
 func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
@@ -74,8 +76,8 @@ func (db *productRepository) GetAllProductBrand() ([]model.Product, error) {
 
 func (db *productRepository) SearchByShortDescription(pattern string) ([]model.Product, error) {
 	var listProduct []model.Product
-	var pattern_new = strings.ReplaceAll(pattern, " ", "%").ReplaceAll(pattern, "%20", "%")
-	fmt.Println(pattern_new)
+
+	var pattern_new = strings.ReplaceAll(pattern, " ", "%")
 
 	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_name LIKE '%" + pattern_new + "%'").Scan(&listProduct).Error
 }
