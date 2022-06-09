@@ -75,7 +75,7 @@ func (db *productRepository) SearchByShortDescription(pattern string) ([]model.P
 	var listProduct []model.Product
 	var pattern_new = strings.ReplaceAll(pattern, " ", "%")
 
-	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_name LIKE '%" + pattern + "%'").Scan(&listProduct).Error
+	return listProduct, db.connection.Raw("SELECT * FROM products WHERE product_name LIKE '%" + pattern_new + "%'").Scan(&listProduct).Error
 }
 func (db *productRepository) GetProductByCategory(categoryId string) (listProduct []model.Product, err error) {
 	return listProduct, db.connection.Find(&listProduct, "product_category_id=?", categoryId).Limit(6).Error
