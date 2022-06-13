@@ -23,6 +23,7 @@ type OrderHandler interface {
 	GetOrderProduct(*gin.Context)
 	GetAllOrderProduct(*gin.Context)
 	UpdateOrderStatus(*gin.Context)
+	GetAllOrderByStatus(*gin.Context)
 }
 
 type orderHandler struct {
@@ -50,7 +51,7 @@ func (h *orderHandler) OrderProduct(ctx *gin.Context) { // TODO: transaction?
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when get address", err))
 		return
 	}
-	orderAddress := address.DetailAddress + ", " + address.Ward + ", " + address.District + ", " + address.City
+	orderAddress := address.Phone + ", " + address.Fullname + ", " + address.DetailAddress + ", " + address.Ward + ", " + address.District + ", " + address.City
 	listCartItems, err := repository.NewCartItemsRepository().GetCartItemsByUserId(fmt.Sprint(userId))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when get list cart items", err))
@@ -268,4 +269,27 @@ func orderToOrderResponse(order model.Order) (response.OrderResponse, error) {
 		UserId:         order.UserId,
 	}
 	return orderResponse, nil
+}
+func(h *orderHandler) GetAllOrderByStatus(ctx *gin.Context) {
+	status := ctx.Query("status")
+	intStatus, err := strconv.Atoi(status)
+	if err != nil || intStatus < 0 || intStatus > 4 {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Invalid status params", err.Error()))
+		return
+	}
+	listOrder, err := h.repo.GetAllOrderByStatus(intStatus)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, helper.BuildResponse(-1, "Error when get list order by status !", err.Error()))
+		return
+	}
+	var orderResponses []response.OrderResponse
+	for _, o := range listOrder {
+		orderRes, err := orderToOrderResponse(o)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, helper.BuildResponse(-1, "error when parse json to list order product", err.Error()))
+			return
+		}
+		orderResponses = append(orderResponses, orderRes)
+	}
+	ctx.JSON(http.StatusOK, helper.BuildResponse(1, "get list orders by status successfully!", orderResponses))
 }

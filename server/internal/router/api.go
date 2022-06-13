@@ -107,6 +107,7 @@ func RunAPI(address string) error {
 		// order info, not allow delete or edit
 		adminAuth.PUT("/orders/:id", orderHandler.UpdateOrderStatus)
 		adminAuth.POST("/orders/update-status", orderHandler.UpdateOrderStatus)
+		adminAuth.GET("/orders", orderHandler.GetAllOrderByStatus)
 
 		// upload file
 		adminAuth.POST("/file-uploads/single-file", handler.SingleFile)

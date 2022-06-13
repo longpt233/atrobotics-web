@@ -13,6 +13,7 @@ type OrderRepository interface {
 	GetOrderById(string, string) (model.Order, error)
 	UpdateOrderStatus(string, int) (model.Order, error)
 	GetAllOrderOptions(userId string, limit int, offset int, sortBy string) ([]model.Order, error)
+	GetAllOrderByStatus(status int) ([]model.Order, error)
 }
 
 type orderRepository struct {
@@ -50,4 +51,8 @@ func (db *orderRepository) UpdateOrderStatus(orderId string, status int) (model.
 
 func (db *orderRepository) GetAllOrderOptions(userId string, limit int, offset int, sortBy string) (orders []model.Order, err error) {
 	return orders, db.connection.Where("user_id=?",userId).Limit(limit).Offset(offset).Order("order_created_at "+sortBy).Find(&orders).Error
+}
+
+func (db *orderRepository) GetAllOrderByStatus(status int) (listOrder []model.Order, err error){
+	return listOrder, db.connection.Where("order_status=?", status).Find(&listOrder).Error
 }
